@@ -3,9 +3,8 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
-    return render_template("oui.html")
-def content(content_id):
-    return content_id
-@app.route('/jeu')
-def jeu():
-    return render_template('jeu.html')
+    return render_template("index.html")
+
+@app.route('/game')
+def game():
+    return render_template('game.html')
