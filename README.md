@@ -11,7 +11,7 @@ This project has been developed as part of the AI creation course. We created a 
 # Requirements
 Install Python 3.12.7
 
-``` curl -o python-installer.exe https://www.python.org/ftp/python/3.x.x/python-3.x.x-amd64.exe ```
+``` curl -o python-installer.exe https://www.python.org/ftp/python/3.12.7/python-3.12.7-amd64.exe ```
 
 Install Flask
 
