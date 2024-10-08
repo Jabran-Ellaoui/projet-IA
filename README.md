@@ -17,5 +17,13 @@ Install Flask
 
 ``` pip install Flask ``` 
 
+Install SQLite
 
+``` https://sqlite.org/download.html``` 
+- Download the adapted version of SQLite for your computer.
+- Don't forget to extract the downloaded file. 
+
+Install SQLAlchemy
+
+``` pip install flask_sqlalchemy ``` 
 
