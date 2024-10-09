@@ -5,7 +5,7 @@ db = SQLAlchemy()
 
 
 class Player(db.Model):
-    __tablename__ = 'players'
+    __tablename__ = 'player'
 
     id_player = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(100), nullable=False)
@@ -16,12 +16,13 @@ class Player(db.Model):
         self.is_human = is_human
 
 class Game(db.Model):
-    __tablename__ = 'games'
+    __tablename__ = 'game'
 
     id_game = db.Column(db.Integer, primary_key=True, autoincrement=True)
     player1_id = db.Column(db.Integer, db.ForeignKey('players.id_player'), nullable=False)
     player2_id = db.Column(db.Integer, db.ForeignKey('players.id_player'), nullable=False)
-    player1_id = db.Column(db.Integer, db.ForeignKey('players.id_player'), nullable=True)
+    current_player = db.Column(db.Integer, db.ForeignKey('players.id_player'), nullable=False)
+    winner_id = db.Column(db.Integer, db.ForeignKey('players.id_player'), nullable=True)
     playerpos1_x = db.Column(db.Integer, nullable=False)
     playerpos1_y = db.Column(db.Integer, nullable=False)
     playerpos2_x = db.Column(db.Integer, nullable=False)
