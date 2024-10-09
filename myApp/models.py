@@ -3,6 +3,18 @@ import logging as lg
 #create database connection object
 db = SQLAlchemy()
 
+
+class Player(db.Model):
+    __tablename__ = 'players'
+
+    id_player = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(100), nullable=False)
+    is_human = db.Column(db.Boolean, nullable=False)  # True for human, False for AI
+
+    def __init__(self, name, is_human):
+        self.name = name
+        self.is_human = is_human
+
 class Game(db.Model):
     __tablename__ = 'games'
 
@@ -10,7 +22,6 @@ class Game(db.Model):
     player1_name = db.Column(db.String(100), nullable=False)
     player2_name = db.Column(db.String(100), nullable=False)
     winner = db.Column(db.String(100), nullable=True)  # Peut être NULL si pas encore de gagnant
-    moves_played = db.Column(db.Integer, nullable=False)
 
     def __init__(self, player1_name, player2_name, winner, moves_played, player1_moves, player2_moves):
         self.player1_name = player1_name
