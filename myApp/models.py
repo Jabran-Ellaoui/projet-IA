@@ -19,10 +19,10 @@ class Game(db.Model):
     __tablename__ = 'game'
 
     id_game = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    player1_id = db.Column(db.Integer, db.ForeignKey('players.id_player'), nullable=False)
-    player2_id = db.Column(db.Integer, db.ForeignKey('players.id_player'), nullable=False)
-    current_player = db.Column(db.Integer, db.ForeignKey('players.id_player'), nullable=False)
-    winner_id = db.Column(db.Integer, db.ForeignKey('players.id_player'), nullable=True)
+    player1_id = db.Column(db.Integer, db.ForeignKey('player.id_player'), nullable=False)
+    player2_id = db.Column(db.Integer, db.ForeignKey('player.id_player'), nullable=False)
+    current_player = db.Column(db.Integer, db.ForeignKey('player.id_player'), nullable=True)
+    winner_id = db.Column(db.Integer, db.ForeignKey('player.id_player'), nullable=True)
     playerpos1_x = db.Column(db.Integer, nullable=False)
     playerpos1_y = db.Column(db.Integer, nullable=False)
     playerpos2_x = db.Column(db.Integer, nullable=False)
@@ -40,4 +40,5 @@ def init_db():
     db.drop_all()
     db.create_all()
     db.session.commit()
+    print("lancéééé")
     lg.warning('DB initialized !')
