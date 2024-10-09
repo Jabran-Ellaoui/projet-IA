@@ -19,15 +19,14 @@ class Game(db.Model):
     __tablename__ = 'games'
 
     id_game = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    player1_name = db.Column(db.String(100), nullable=False)
-    player2_name = db.Column(db.String(100), nullable=False)
+    player1_id = db.Column(db.Integer, db.ForeignKey('players.id_player'), nullable=False)
+    player2_id = db.Column(db.Integer, db.ForeignKey('players.id_player'), nullable=False)
     winner = db.Column(db.String(100), nullable=True)  # Peut être NULL si pas encore de gagnant
 
-    def __init__(self, player1_name, player2_name, winner, moves_played, player1_moves, player2_moves):
-        self.player1_name = player1_name
-        self.player2_name = player2_name
+    def __init__(self, player1_id, player2_id, winner):
+        self.player1_id = player1_id
+        self.player2_id = player2_id
         self.winner = winner
-        self.moves_played = moves_played
 
 class Move(db.Model):
     __tablename__ = 'moves'
