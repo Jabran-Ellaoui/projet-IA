@@ -23,8 +23,8 @@ class Game(db.Model):
     id_game = db.Column(db.Integer, primary_key=True, autoincrement=True)
     player1_id = db.Column(db.Integer, db.ForeignKey('players.id_player'), nullable=False)
     player2_id = db.Column(db.Integer, db.ForeignKey('players.id_player'), nullable=False)
-    winner = db.Column(db.String(100), nullable=True)  # Peut être NULL si pas encore de gagnant
-    boxes1 = db.Column(db.String(100), nullable=True) # une lettre représente une case, 1 pour joueur 1, 2 joueur 2 ,
+    player1_id = db.Column(db.Integer, db.ForeignKey('players.id_player'), nullable=True)
+    boxes = db.Column(db.String(25), nullable=True) # une lettre représente une case, 1 pour joueur 1, 2 joueur 2 ,
     # 0 aucun joueur. 25 lettres, lignes espacées par un espace ducoup xxxxx xxxxx xxxxx xxxxx xxxxx
 
     def __init__(self, player1_id, player2_id, winner):
