@@ -10,8 +10,6 @@ class Player(db.Model):
     id_player = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(100), nullable=False)
     is_human = db.Column(db.Boolean, nullable=False)  # True for human, False for AI
-    playerpos_x = db.Column(db.Integer, nullable=False)
-    playerpos_y = db.Column(db.Integer, nullable=False)
 
     def __init__(self, name, is_human):
         self.name = name
@@ -24,6 +22,11 @@ class Game(db.Model):
     player1_id = db.Column(db.Integer, db.ForeignKey('players.id_player'), nullable=False)
     player2_id = db.Column(db.Integer, db.ForeignKey('players.id_player'), nullable=False)
     player1_id = db.Column(db.Integer, db.ForeignKey('players.id_player'), nullable=True)
+    playerpos1_x = db.Column(db.Integer, nullable=False)
+    playerpos1_y = db.Column(db.Integer, nullable=False)
+    playerpos2_x = db.Column(db.Integer, nullable=False)
+    playerpos2_y = db.Column(db.Integer, nullable=False)
+
     boxes = db.Column(db.String(25), nullable=True) # une lettre représente une case, 1 pour joueur 1, 2 joueur 2 ,
     # 0 aucun joueur. 25 lettres, lignes espacées par un espace ducoup xxxxx xxxxx xxxxx xxxxx xxxxx
 
@@ -32,20 +35,6 @@ class Game(db.Model):
         self.player2_id = player2_id
         self.winner = winner
 
-class Move(db.Model):
-    __tablename__ = 'moves'
-
-    id_move = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    game_id = db.Column(db.Integer, db.ForeignKey('games.id_game'), nullable=False)
-    player_id = db.Column(db.Integer, db.ForeignKey('players.id_player'))
-    x_coordinate = db.Column(db.Integer, nullable=False)  # Coordonnée x
-    y_coordinate = db.Column(db.Integer, nullable=False)  # Coordonnée y
-
-    def __init__(self, game_id, player, x_coordinate, y_coordinate):
-        self.game_id = game_id
-        self.player = player
-        self.x_coordinate = x_coordinate
-        self.y_coordinate = y_coordinate
 def init_db():
     db.drop_all()
     db.create_all()
