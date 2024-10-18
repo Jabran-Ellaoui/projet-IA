@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../static/gamestyle.css">
+    <title>Grille 5x5</title>
+    <style>
+        table {
+            border-collapse: collapse;
+        }
+
+        td {
+            width: 50px;
+            height: 50px;
+            border: 1px solid black;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .player1 {
+            background-color: blue;
+        }
+
+        .player2 {
+            background-color: red;
+        }
+
+        .occupied {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <h2 id="turnMessage">C'est au tour de Joueur 1 de jouer !</h2>
+
+    <table>
+        <tbody>
+            <script>
+                // Position initiale des joueurs
+                let currentPlayer = 1;
+                let player1Pos = { x: 0, y: 0 };  // Joueur 1 commence en haut à gauche
+                let player2Pos = { x: 4, y: 4 };  // Joueur 2 commence en bas à droite
+
+                // Fonction pour changer de tour et mettre à jour le message
+                function changeTurn() {
+                    currentPlayer = currentPlayer === 1 ? 2 : 1;
+                    document.getElementById('turnMessage').innerText =
+                        "C'est au tour de Joueur " + currentPlayer + " de jouer !";
+                }
+
+                // Fonction pour vérifier si un mouvement est valide (cases adjacentes ou case déjà possédée)
+                function isMoveValid(x, y, cell) {
+                    let playerPos = currentPlayer === 1 ? player1Pos : player2Pos;
+                    let distance = Math.abs(playerPos.x - x) + Math.abs(playerPos.y - y);
+
+                    // Vérifie si c'est une case adjacente ou si c'est une case déjà possédée par le joueur
+                    if (distance === 1 || 
+                       (currentPlayer === 1 && cell.classList.contains('player1')) || 
+                       (currentPlayer === 2 && cell.classList.contains('player2'))) {
+                        return true;
+                    }
+                    return false;
+                }
+
+                // Fonction pour marquer une case et déplacer le joueur
+                function markCell(cell, x, y) {
+                    if (isMoveValid(x, y, cell)) {
+                        // Enlever le marquage du joueur actuel sur l'ancienne position
+                        let playerPos = currentPlayer === 1 ? player1Pos : player2Pos;
+                        let oldCell = document.getElementById('cell-' + playerPos.x + '-' + playerPos.y);
+                        oldCell.classList.remove('occupied');
+                        oldCell.innerText = '';  // Enlever le texte 'J1' ou 'J2'
+
+                        // Colorer la nouvelle case et marquer la position du joueur
+                        if (currentPlayer === 1) {
+                            player1Pos = { x: x, y: y };
+                            cell.classList.add('player1', 'occupied');
+                            cell.innerText = 'J1';
+                        } else {
+                            player2Pos = { x: x, y: y };
+                            cell.classList.add('player2', 'occupied');
+                            cell.innerText = 'J2';
+                        }
+
+                        // Laisser la case cliquable pour permettre de revenir dessus si besoin
+                        // On n'enlève plus l'event `onclick`
+
+                        // Changer de joueur
+                        changeTurn();
+                    } else {
+                        alert("Déplacement invalide. Vous ne pouvez bouger qu'autour de votre position ou sur une case déjà possédée.");
+                    }
+                }
+
+                // Générer la grille 5x5
+                for (let i = 0; i < 5; i++) {
+                    document.write('<tr>');
+                    for (let j = 0; j < 5; j++) {
+                        let cellId = 'cell-' + i + '-' + j;
+                        if (i === 0 && j === 0) {
+                            // Position initiale de Joueur 1
+                            document.write('<td id="' + cellId + '" class="player1 occupied">J1</td>');
+                        } else if (i === 4 && j === 4) {
+                            // Position initiale de Joueur 2
+                            document.write('<td id="' + cellId + '" class="player2 occupied">J2</td>');
+                        } else {
+                            // Cases vides, clic pour marquer la case
+                            document.write('<td id="' + cellId + '" onclick="markCell(this, ' + i + ', ' + j + ')"></td>');
+                        }
+                    }
+                    document.write('</tr>');
+                }
+            </script>
+        </tbody>
+    </table>
+
+</body>
+</html>

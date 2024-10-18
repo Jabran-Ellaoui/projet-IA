@@ -1,4 +1,4 @@
-from myApp import app
+from conquest_squares_game import app
 
 
 
