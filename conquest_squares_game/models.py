@@ -22,7 +22,6 @@ class Game(db.Model):
     player1_id = db.Column(db.Integer, db.ForeignKey('player.id_player'), nullable=False)
     player2_id = db.Column(db.Integer, db.ForeignKey('player.id_player'), nullable=False)
     current_player = db.Column(db.Integer, db.ForeignKey('player.id_player'), nullable=True)
-    winner_id = db.Column(db.Integer, db.ForeignKey('player.id_player'), nullable=True)
     playerpos1_x = db.Column(db.Integer, nullable=False)
     playerpos1_y = db.Column(db.Integer, nullable=False)
     playerpos2_x = db.Column(db.Integer, nullable=False)
@@ -39,8 +38,11 @@ class Game(db.Model):
         self.playerpos2_x = 5
         self.playerpos2_y = 5
         self.current_player= self.player1_id
-        self.boxes = "1xxxx xxxxx xxxxx xxxxx xxxx2"
-        self.winner_id = None
+        self.boxes = self.boxes = "".join([
+                "1" + "x" * (table_size - 1),
+                " " + ("x" * table_size + " ") * (table_size - 2), 
+                "x" * (table_size - 1) + "2"
+        ])
 
 
 def init_db():
