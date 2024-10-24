@@ -22,7 +22,8 @@ class Game(db.Model):
     player1_id = db.Column(db.Integer, db.ForeignKey('player.id_player'), nullable=False)
     player2_id = db.Column(db.Integer, db.ForeignKey('player.id_player'), nullable=False)
     current_player = db.Column(db.Integer, db.ForeignKey('player.id_player'), nullable=True)
-    winner_id = db.Column(db.Integer, db.ForeignKey('player.id_player'), nullable=True)
+    ##ne faut pas la peine, dérivable par rapport au string
+    ##winner_id = db.Column(db.Integer, db.ForeignKey('player.id_player'), nullable=True)
     playerpos1_x = db.Column(db.Integer, nullable=False)
     playerpos1_y = db.Column(db.Integer, nullable=False)
     playerpos2_x = db.Column(db.Integer, nullable=False)
@@ -31,16 +32,20 @@ class Game(db.Model):
     boxes = db.Column(db.String(25), nullable=False) # une lettre représente une case, 1 pour joueur 1, 2 joueur 2 ,
     # 0 aucun joueur. 25 lettres, lignes espacées par un espace ducoup xxxxx xxxxx xxxxx xxxxx xxxxx
 
-    def __init__(self, player1_id, player2_id, ):
+    def __init__(self, player1_id, player2_id, table_size ):
         self.player1_id = player1_id
         self.player2_id = player2_id
         self.playerpos1_x = 1
         self.playerpos1_y = 1
-        self.playerpos2_x = 5
-        self.playerpos2_y = 5
+        self.playerpos2_x = table_size
+        self.playerpos2_y = table_size
         self.current_player= self.player1_id
-        self.boxes = "1xxxx xxxxx xxxxx xxxxx xxxx2"
-        self.winner_id = None
+        ## pour rendre addaptable au niveau de la taille du tableau, il faut pouvoir prévoir pour des tailles différentes
+        self.boxes = self.boxes = "".join([
+                "1" + "x" * (table_size - 1), ##premier ligne
+                " " + ("x" * table_size + " ") * (table_size - 2), ## les lignes intermédiaires constituaient que de x
+                "x" * (table_size - 1) + "2"## deuxième ligne
+        ])
 
 
 def init_db():
