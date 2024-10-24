@@ -22,8 +22,6 @@ class Game(db.Model):
     player1_id = db.Column(db.Integer, db.ForeignKey('player.id_player'), nullable=False)
     player2_id = db.Column(db.Integer, db.ForeignKey('player.id_player'), nullable=False)
     current_player = db.Column(db.Integer, db.ForeignKey('player.id_player'), nullable=True)
-    ##ne faut pas la peine, dérivable par rapport au string
-    ##winner_id = db.Column(db.Integer, db.ForeignKey('player.id_player'), nullable=True)
     playerpos1_x = db.Column(db.Integer, nullable=False)
     playerpos1_y = db.Column(db.Integer, nullable=False)
     playerpos2_x = db.Column(db.Integer, nullable=False)
@@ -40,11 +38,10 @@ class Game(db.Model):
         self.playerpos2_x = table_size
         self.playerpos2_y = table_size
         self.current_player= self.player1_id
-        ## pour rendre addaptable au niveau de la taille du tableau, il faut pouvoir prévoir pour des tailles différentes
         self.boxes = self.boxes = "".join([
-                "1" + "x" * (table_size - 1), ##premier ligne
-                " " + ("x" * table_size + " ") * (table_size - 2), ## les lignes intermédiaires constituaient que de x
-                "x" * (table_size - 1) + "2"## deuxième ligne
+                "1" + "x" * (table_size - 1),
+                " " + ("x" * table_size + " ") * (table_size - 2), 
+                "x" * (table_size - 1) + "2"
         ])
 
 
