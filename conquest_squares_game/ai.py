@@ -6,17 +6,18 @@ def get_move(game_id):
     positif_movement_checking = False
 
     current_game = db.Game.query.get(game_id)
-    current_player.x = current_game.playerpos1_x if current_game.current_player == current_game.player1_id else current_game.playerpos2_x
-    current_player.y = current_game.playerpos1_y if current_game.current_player == current_game.player1_id else current_game.playerpos2_y
-    current_player.symbol = str(1 if current_game.current_player == current_game.player1_id else 2)
+    current_player_x = current_game.playerpos1_x if current_game.current_player == current_game.player1_id else current_game.playerpos2_x
+    current_player_y = current_game.playerpos1_y if current_game.current_player == current_game.player1_id else current_game.playerpos2_y
+    current_player_symbol = str(1 if current_game.current_player == current_game.player1_id else 2)
     
     lines = (current_game.boxes).strip().split(' ')
     grid = [list(line) for line in lines]
 
     while (not positif_movement_checking):
         direction = random.choice([(1, 0), (-1, 0), (0, 1), (0, -1)])
-        movement.x, movement.y = direction
-        positif_movement_checking = is_valid_movement(movement, grid, current_player)
+        movement_x, movement_y = direction
+        movement = {"x" : movement_x, "y" : movement_y}
+        positif_movement_checking = is_valid_movement(movement, grid, {"x" : current_player_x,"y" : current_player_y, "symbol" : current_player_symbol})
 
     return movement
 
