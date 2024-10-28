@@ -3,6 +3,13 @@ import logging as lg
 
 db = SQLAlchemy()
 
+
+def init_db():
+ #db.drop_all() déplacer qd on utilisera l'IA
+ db.create_all()
+ db.session.commit()
+ lg.warning('Database initialized!')
+
 class Player(db.Model):
     __tablename__ = 'player'
 
@@ -41,11 +48,3 @@ class Game(db.Model):
                 " " + ("x" * table_size + " ") * (table_size - 2), 
                 "x" * (table_size - 1) + "2"
         ])
-
-# Create database connection object
-db = SQLAlchemy()
-def init_db():
- db.drop_all()
- db.create_all()
- db.session.commit()
- lg.warning('Database initialized!')

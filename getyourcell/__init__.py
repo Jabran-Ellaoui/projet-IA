@@ -1,11 +1,17 @@
 from flask import Flask
-from .views import app
 from . import models
+from .models import init_db
 
 
-# Connect sqlalchemy to app
-models.db.init_app(app)
+def create_app():
+    app = Flask(__name__)
+    app.config.from_object('config')
 
-@app.cli.command("init_db")
-def init_db():
- models.init_db()
+    with app.app_context():
+        from . import views, models
+        init_db()
+
+    @app.cli.command("init_db")
+    def init_db():
+        models.init_db()
+    return app
