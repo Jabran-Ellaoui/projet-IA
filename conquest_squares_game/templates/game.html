@@ -38,42 +38,42 @@
     <table>
         <tbody>
             <script>
-                // Position initiale des joueurs
+                // Initial positions of players
                 let currentPlayer = 1;
-                let player1Pos = { x: 0, y: 0 };  // Joueur 1 commence en haut à gauche
-                let player2Pos = { x: 4, y: 4 };  // Joueur 2 commence en bas à droite
+                let player1Pos = { x: 0, y: 0 };  // Player 1 starts at top-left
+                let player2Pos = { x: 4, y: 4 };  // Player 2 starts at bottom-right
 
-                // Fonction pour changer de tour et mettre à jour le message
+                // Function to change the turn and update the message
                 function changeTurn() {
                     currentPlayer = currentPlayer === 1 ? 2 : 1;
                     document.getElementById('turnMessage').innerText =
                         "C'est au tour de Joueur " + currentPlayer + " de jouer !";
                 }
 
-                // Fonction pour vérifier si un mouvement est valide (cases adjacentes ou case déjà possédée)
+                // Check if a move is valid (adjacent cells or already owned cell)
                 function isMoveValid(x, y, cell) {
                     let playerPos = currentPlayer === 1 ? player1Pos : player2Pos;
                     let distance = Math.abs(playerPos.x - x) + Math.abs(playerPos.y - y);
 
-                    // Vérifie si c'est une case adjacente ou si c'est une case déjà possédée par le joueur
-                    if (distance === 1 || 
-                       (currentPlayer === 1 && cell.classList.contains('player1')) || 
-                       (currentPlayer === 2 && cell.classList.contains('player2'))) {
+                    // Check if it's an adjacent cell or an already owned cell
+                    if (distance === 1 ||
+                        (currentPlayer === 1 && cell.classList.contains('player1')) ||
+                        (currentPlayer === 2 && cell.classList.contains('player2'))) {
                         return true;
                     }
                     return false;
                 }
 
-                // Fonction pour marquer une case et déplacer le joueur
-                function markCell(cell, x, y) {
+                // Function to mark a cell and move the player
+                async function markCell(cell, x, y) {
                     if (isMoveValid(x, y, cell)) {
-                        // Enlever le marquage du joueur actuel sur l'ancienne position
+                        // Remove the current player's marker from the old position
                         let playerPos = currentPlayer === 1 ? player1Pos : player2Pos;
                         let oldCell = document.getElementById('cell-' + playerPos.x + '-' + playerPos.y);
                         oldCell.classList.remove('occupied');
-                        oldCell.innerText = '';  // Enlever le texte 'J1' ou 'J2'
+                        oldCell.innerText = '';  // Clear text
 
-                        // Colorer la nouvelle case et marquer la position du joueur
+                        // Color the new cell and update the player's position
                         if (currentPlayer === 1) {
                             player1Pos = { x: x, y: y };
                             cell.classList.add('player1', 'occupied');
@@ -84,29 +84,72 @@
                             cell.innerText = 'J2';
                         }
 
-                        // Laisser la case cliquable pour permettre de revenir dessus si besoin
-                        // On n'enlève plus l'event `onclick`
+                        // Send the move to the server
+                        let response = await fetch('/play', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                x: x,
+                                y: y,
+                                player: currentPlayer,
+                            }),
+                        });
 
-                        // Changer de joueur
-                        changeTurn();
+                        if (response.ok) {
+                            let result = await response.json();
+                            console.log(result);  // Debug
+
+                            // Update the board based on the server response
+                            updateBoard(result.gameState.board);
+
+                            // Switch players
+                            changeTurn();
+                        } else {
+                            alert("Erreur lors du mouvement: " + (await response.json()).status);
+                        }
                     } else {
                         alert("Déplacement invalide. Vous ne pouvez bouger qu'autour de votre position ou sur une case déjà possédée.");
                     }
                 }
 
-                // Générer la grille 5x5
+                // Function to update the board based on the game state
+                function updateBoard(board) {
+                    for (let i = 0; i < board.length; i++) {
+                        for (let j = 0; j < board[i].length; j++) {
+                            let cellId = 'cell-' + i + '-' + j;
+                            let cell = document.getElementById(cellId);
+
+                            // Clear previous states
+                            cell.innerText = '';
+                            cell.classList.remove('player1', 'player2', 'occupied');
+
+                            // Apply ownership based on the board state
+                            if (board[i][j] === "J1") {
+                                cell.classList.add('player1', 'occupied');
+                                cell.innerText = 'J1';
+                            } else if (board[i][j] === "J2") {
+                                cell.classList.add('player2', 'occupied');
+                                cell.innerText = 'J2';
+                            }
+                        }
+                    }
+                }
+
+                // Generate the 5x5 grid
                 for (let i = 0; i < 5; i++) {
                     document.write('<tr>');
                     for (let j = 0; j < 5; j++) {
                         let cellId = 'cell-' + i + '-' + j;
                         if (i === 0 && j === 0) {
-                            // Position initiale de Joueur 1
+                            // Initial position of Player 1
                             document.write('<td id="' + cellId + '" class="player1 occupied">J1</td>');
                         } else if (i === 4 && j === 4) {
-                            // Position initiale de Joueur 2
+                            // Initial position of Player 2
                             document.write('<td id="' + cellId + '" class="player2 occupied">J2</td>');
                         } else {
-                            // Cases vides, clic pour marquer la case
+                            // Empty cells, click to mark the cell
                             document.write('<td id="' + cellId + '" onclick="markCell(this, ' + i + ', ' + j + ')"></td>');
                         }
                     }
@@ -118,3 +161,4 @@
 
 </body>
 </html>
+
