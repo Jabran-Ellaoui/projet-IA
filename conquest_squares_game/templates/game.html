@@ -93,25 +93,79 @@
                         alert("Déplacement invalide. Vous ne pouvez bouger qu'autour de votre position ou sur une case déjà possédée.");
                     }
                 }
-
-                // Générer la grille 5x5
+                
+                // pour ajouter de façon rapide l'ensemble du tableau dans le HTML 
                 for (let i = 0; i < 5; i++) {
                     document.write('<tr>');
-                    for (let j = 0; j < 5; j++) {
-                        let cellId = 'cell-' + i + '-' + j;
-                        if (i === 0 && j === 0) {
-                            // Position initiale de Joueur 1
-                            document.write('<td id="' + cellId + '" class="player1 occupied">J1</td>');
-                        } else if (i === 4 && j === 4) {
-                            // Position initiale de Joueur 2
-                            document.write('<td id="' + cellId + '" class="player2 occupied">J2</td>');
-                        } else {
-                            // Cases vides, clic pour marquer la case
-                            document.write('<td id="' + cellId + '" onclick="markCell(this, ' + i + ', ' + j + ')"></td>');
-                        }
+                    for (let j = 0; j < 5; j++) {                      
+                        document.write('<td id="' + cellId + '" onclick="markCell(this, ' + i + ', ' + j + ')"></td>');                      
                     }
                     document.write('</tr>');
                 }
+
+                // il vas falloir penser à initialisé les données qui concerne le jeux, en cours, par rapport
+                // à la base de données
+
+                // ici, on définie les actions à entreprendre quand on utilise une flèche du clavier
+                // toujours que deux case qui réagisse à cette action, les deux cases où se trouve les joueurs
+                // ensuite par rapport à la case touché, une GET ou POST est envoyer à la base de données, pour voir si l'action 
+                // correspond, si pas, alors on envoyer un message 'erreur'
+                // si oui, l'ia fait sa modification (tour) puis une nouvelle 
+                //version de tableau est envoyer pour réafiché le tableau, et les localisations sont changés
+                
+                document.addEventListener('keydown', await function(event) { // todo : pas sûr que cela soit ici, qu'il faut mettre le await
+                
+                    switch (event.key) {
+                        case 'ArrowUp':
+                            axe = "vertical"
+                            direction = 1
+                            console.log('Flèche Haut pressée');
+                            break;
+                        case 'ArrowDown':
+                            axe = "vertical"
+                            direction = -1
+                            console.log('Flèche Bas pressée');
+                            break;
+                        case 'ArrowLeft':
+                            axe = "horizontal"
+                            direction = -1
+                            console.log('Flèche Gauche pressée');
+                            break;
+                        case 'ArrowRight':
+                            axe = "horizontal"
+                            direction = 1
+                            console.log('Flèche Droite pressée');
+                            break;   
+                    }
+                
+                    // envoie la demande de déplacement au serveur local par le port 4000
+                    // cela envoie un post à la vue travel_request, et attend sa réponse
+
+                    const reponse = fetch("http://127.0.0.1:5000/travel_request", {
+                            method: "POST",
+                            headers: {"Content-Type" : "application/json"},
+                            body: JSON.stringify({ "axe" : axe, "direction" : direction})
+                }) 
+            })
+                
+                // selon la réponse, change le html pour correspondre
+                //possitife : son déplacement et le déplacmeent de l'IA
+                //négatif : le déplacement est mauvais, essayer un autre
+
+                // et cela encore et encore jusqu'a ce qu'il ne reste plus aucune case vide
+
+                // Générer la grille 5x5
+                 
+                // premier étapes faire en sorte que le jeu fonctionne sans utilise la base de données, 
+                // réaction au flèche
+                // transfére POST
+                // serveur : evaluation du mouvement
+                // ajouté du mouvement IA
+                // évaluation du movuement IA
+                // renvoie au client
+                // affichage du résultat à la partie client, 
+                // deuxièmeement , faire en srote que la base de données soit mis a contribution. 
+
             </script>
         </tbody>
     </table>
