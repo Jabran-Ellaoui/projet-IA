@@ -1,5 +1,12 @@
 from flask import Flask, render_template
 from . import models
+<<<<<<< Updated upstream
+=======
+from .ai import get_move
+from .models import Player, Game, db
+import random
+
+>>>>>>> Stashed changes
 app = Flask(__name__)
 
 app.config.from_object('config')
