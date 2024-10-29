@@ -43,6 +43,19 @@ class Game(db.Model):
                 " " + ("x" * table_size + " ") * (table_size - 2), 
                 "x" * (table_size - 1) + "2"
         ])
+    def apply_movement(self, player_new_x, player_new_y, new_boxes):
+        if(self.player1_id == self.current_player):
+            self.playerpos1_x = player_new_x
+            self.playerpos1_y = player_new_y 
+            self.current_player = self.player2_id
+        else :
+            self.playerpos2_x = player_new_x
+            self.playerpos2_y = player_new_y
+            self.current_player = self.player1_id
+
+        self.boxes = new_boxes
+        db.session.commit() 
+        return (self.playerpos1_x, self.playerpos1_y) if self.current_player == self.player1_id else (self.playerpos2_x, self.playerpos2_y)
 
 
 def init_db():

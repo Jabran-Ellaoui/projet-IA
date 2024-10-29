@@ -1,4 +1,4 @@
-from models import db, Game, Player
+from .models import db, Game, Player
 import random
 
 # return acceptable move chose by ai (random) (possibility : (0,1) : up, (1,0) : right, (0,-1) : down, (-1,0): left), without change data in the data base
