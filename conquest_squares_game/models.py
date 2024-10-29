@@ -46,13 +46,13 @@ class Game(db.Model):
     def apply_movement(self, player_new_x, player_new_y, new_boxes):
         if(self.player1_id == self.current_player):
             self.playerpos1_x = player_new_x
-            self.playerpos1_y = player_new_y 
+            self.playerpos1_y = player_new_y           
             self.current_player = self.player2_id
         else :
             self.playerpos2_x = player_new_x
             self.playerpos2_y = player_new_y
             self.current_player = self.player1_id
-
+        print(self.boxes,"-----BD----->",new_boxes)
         self.boxes = new_boxes
         db.session.commit() 
         return (self.playerpos1_x, self.playerpos1_y, self.playerpos2_x, self.playerpos2_y) if self.current_player == self.player1_id else (self.playerpos2_x, self.playerpos2_y, self.playerpos1_x, self.playerpos1_y)
