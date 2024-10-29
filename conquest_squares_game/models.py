@@ -30,19 +30,32 @@ class Game(db.Model):
     boxes = db.Column(db.String(25), nullable=False) # une lettre représente une case, 1 pour joueur 1, 2 joueur 2 ,
     # 0 aucun joueur. 25 lettres, lignes espacées par un espace ducoup xxxxx xxxxx xxxxx xxxxx xxxxx
 
-    def __init__(self, player1_id, player2_id,table_size ):
+    def __init__(self, player1_id, player2_id, table_size ):
         self.player1_id = player1_id
         self.player2_id = player2_id
-        self.playerpos1_x = 1
-        self.playerpos1_y = 1
-        self.playerpos2_x = 5
-        self.playerpos2_y = 5
+        self.playerpos1_x = 0
+        self.playerpos1_y = 0   
+        self.playerpos2_x = table_size -1
+        self.playerpos2_y = table_size -1
         self.current_player= self.player1_id
         self.boxes = self.boxes = "".join([
                 "1" + "x" * (table_size - 1),
                 " " + ("x" * table_size + " ") * (table_size - 2), 
                 "x" * (table_size - 1) + "2"
         ])
+    def apply_movement(self, player_new_x, player_new_y, new_boxes):
+        if(self.player1_id == self.current_player):
+            self.playerpos1_x = player_new_x
+            self.playerpos1_y = player_new_y           
+            self.current_player = self.player2_id
+        else :
+            self.playerpos2_x = player_new_x
+            self.playerpos2_y = player_new_y
+            self.current_player = self.player1_id
+        print(self.boxes,"-----BD----->",new_boxes)
+        self.boxes = new_boxes
+        db.session.commit() 
+        return (self.playerpos1_x, self.playerpos1_y, self.playerpos2_x, self.playerpos2_y) if self.current_player == self.player1_id else (self.playerpos2_x, self.playerpos2_y, self.playerpos1_x, self.playerpos1_y)
 
 
 def init_db():
