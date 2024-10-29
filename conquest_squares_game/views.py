@@ -38,51 +38,58 @@ def jeu():
     return render_template('game.html', game_id=new_game.id_game, grid_state = new_game.boxes )
 
 def is_valid_movement(movement, array_string, player):
+    print("is valid movement : point -1 valeur tableau : ", array_string)
     # Convertit array_string en une grille de caractères
     lines = array_string.strip().split(' ')
     grid = [list(line) for line in lines]
     n = len(grid)  # Dimension de la grille
+    print("is valid movement : point 0 ")
     print("player old x: ",player["x"],"player old y",player["y"])
     # Calcule la nouvelle position
+    print("movement:", movement)
+    print("player:", player)
     new_x = player["x"] + movement["x"]
     new_y = player["y"] + movement["y"]
-    print("x : ",movement["x"],"y : ",movement["y"])
-    print('new_x : ',new_x,'new_y : ',new_y)
+    print("is valid movement : point 1 ")
     # Vérifie les limites de la grille et la présence d'un obstacle
-    if not (1 <= new_x <= n and 1 <= new_y <= n):
+    if not (0 <= new_x < n and 0 <= new_y < n):
+        print("is valid movement : limite par les bornes")
         return -1  # Mouvement non autorisé
     
-  
-    if grid[new_x - 1][new_y - 1] == 'x' or int(grid[new_x - 1][new_y - 1]) == int( player["symbol"]):
+    print("is valid movement : point 2 ",grid[new_x][new_y] == 'x', grid[new_x][new_y])
+    print("avant limite par les symboles : valeur grid case objectif",grid[new_x][new_y])
+    if grid[new_y][new_x] == 'x' or int(grid[new_y][new_x]) == int( player["symbol"]):
         
         # Mouvement autorisé, mise à jour de la grille
-        grid[new_y - 1][new_x - 1] = player["symbol"]  # La nouvelle position prend le symbole du joueur
-
+        grid[new_y][new_x] = player["symbol"]  # La nouvelle position prend le symbole du joueur
+        print("is valid movement : point 3 ")
         # Reconstruit array_string avec la grille mise à jour
         modified_array_string = ' '.join(''.join(row) for row in grid)
         print(modified_array_string)
         # Retourne la nouvelle position et la grille mise à jour
         return new_x, new_y, modified_array_string
     else :
+        print("is valid movement : limite par les symboles")
         return -1
 
 @app.route('/travel_request', methods=['POST'])
 def travel_request():
     data = request.json # récupére les données du client 
-
-    movement_x = data.get("x")
-    movement_y = data.get("y")
+    print("app.route : travel_request: point 1") 
+    movement_x = data.get("current_x")
+    movement_y = data.get("current_y")
     game_id = data.get("game_id")
     current_game = Game.query.get(game_id)
     player_symbol = "1" if current_game.current_player == current_game.player1_id else "2"
     player_x = current_game.playerpos1_x if player_symbol == "1" else current_game.playerpos2_x
     player_y = current_game.playerpos1_y if player_symbol == "1" else current_game.playerpos2_y
     array_string = current_game.boxes
+    print("app.route : travel_request: point 2")
     result = is_valid_movement({"x": movement_x, "y": movement_y},array_string,{"x": player_x, "y":player_y, "symbol": player_symbol})
-    print(result) #todo : pense à faire disparaitre
+    
     if result == - 1 :
-       return "-1"
-    else :
-        new_x, new_y, array_string = result
-        other_player_x, other_player_y = current_game.apply_movement(new_x,new_y,array_string)
-        return jsonify({"new_grid" : array_string, "new_current_player_x" : other_player_x, "new_current_player_y" : other_player_y })
+        return "-1"
+    new_x, new_y, array_string = result
+    new_player_x, new_player_y, last_player_y, last_player_x = current_game.apply_movement(new_x,new_y,array_string)
+    print("app.route : travel_request: point 3")
+    return jsonify({"new_grid" : array_string, "new_current_player_x" : new_player_x, "new_current_player_y" : new_player_y, "other_x": last_player_x, "other_y": last_player_y })

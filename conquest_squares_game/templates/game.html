@@ -19,11 +19,11 @@
         }
 
         .player1 {
-            background-color: blue;
+            background-color: greenyellow;
         }
 
         .player2 {
-            background-color: red;
+            background-color: palevioletred;
         }
 
         .occupied {
@@ -41,8 +41,9 @@
         let currentPlayer = 1;
         let game_id = {{ game_id }};  // Vous devez définir l'ID du jeu ici.
         let grille = {{ grid_state | tojson | safe}}
-        
-        function generateGrid(gridString, current_player_x,current_player_y) {
+       
+
+        function generateGrid(gridString, current_player_x,current_player_y, other_player_x, other_player_y) {
             const gridElement = document.getElementById('grid');
             gridElement.innerHTML = '';  // Effacer la grille actuelle
 
@@ -55,15 +56,28 @@
                     cell.id = `cell-${i}-${j}`;
 
                     // Définir le contenu et les classes en fonction de la valeur
-                    if (rows[i][j] === '1') {
+                    if (rows[i][j] == '1') {
                         cell.classList.add('player1', 'occupied');
                         cell.innerText = '';
-                    } else if (rows[i][j] === '2') {
+
+                    } else if (rows[i][j] == '2') {
                         cell.classList.add('player2', 'occupied');
                         cell.innerText = '';
-                    } if (i == current_player_x && j == current_player_y) {
+                    } 
+                     
+                    if (i == [current_player_y] && j == [current_player_x]) {
                         cell.innerText = 'X';
                         cell.style.color = 'black';
+                        cell.style.fontWeight = 'bold';
+                        cell.style.fontSize = '24px'; 
+                        
+                        console.log("current player x : ", current_player_x, "current player y : ",current_player_y)
+                    }
+
+                    if (i == [other_player_x] && j == [other_player_y]) {
+                        cell.innerText = 'X';
+                        cell.style.color = 'black';
+                        console.log("other player x : ", other_player_x, "other player y : ", other_player_y)
                     }
 
                     row.appendChild(cell);
@@ -87,13 +101,13 @@
             const response = await fetch("http://127.0.0.1:5000/travel_request", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ "x": x, "y": y, "game_id": game_id })
+                body: JSON.stringify({ "current_x": x, "current_y": y, "game_id": game_id })
             }
             );
 
             const result = await response.json();
             if (result != "-1") {
-                generateGrid(result.new_grid,result.new_current_player_x,result.new_current_player_y);  // Met à jour la grille avec la nouvelle position
+                generateGrid(result.new_grid,result.new_current_player_x,result.new_current_player_y, result.other_x, result.other_y);  // Met à jour la grille avec la nouvelle position
                 currentPlayer = currentPlayer === 1 ? 2 : 1;  // Changer de joueur
                 document.getElementById('turnMessage').innerText =
                     `C'est au tour de Joueur ${currentPlayer} de jouer `;
@@ -105,7 +119,7 @@
         // Initialiser la grille
         document.addEventListener("DOMContentLoaded", function () {
             // Remplir la grille initiale (fournie depuis le serveur ou définie ici)
-            generateGrid(grille)
+            generateGrid(grille, 0,0,4,4) //todo : hardcodé, aaahhhh
         });
        
 

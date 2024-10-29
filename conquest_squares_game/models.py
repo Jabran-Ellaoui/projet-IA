@@ -33,10 +33,10 @@ class Game(db.Model):
     def __init__(self, player1_id, player2_id, table_size ):
         self.player1_id = player1_id
         self.player2_id = player2_id
-        self.playerpos1_x = 1
-        self.playerpos1_y = 1
-        self.playerpos2_x = table_size
-        self.playerpos2_y = table_size
+        self.playerpos1_x = 0
+        self.playerpos1_y = 0   
+        self.playerpos2_x = table_size -1
+        self.playerpos2_y = table_size -1
         self.current_player= self.player1_id
         self.boxes = self.boxes = "".join([
                 "1" + "x" * (table_size - 1),
@@ -55,7 +55,7 @@ class Game(db.Model):
 
         self.boxes = new_boxes
         db.session.commit() 
-        return (self.playerpos1_x, self.playerpos1_y) if self.current_player == self.player1_id else (self.playerpos2_x, self.playerpos2_y)
+        return (self.playerpos1_x, self.playerpos1_y, self.playerpos2_x, self.playerpos2_y) if self.current_player == self.player1_id else (self.playerpos2_x, self.playerpos2_y, self.playerpos1_x, self.playerpos1_y)
 
 
 def init_db():
