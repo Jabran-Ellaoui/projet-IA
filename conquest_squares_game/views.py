@@ -1,7 +1,12 @@
-from flask import Flask, render_template, request, jsonify 
-from .models import db, Player, Game
+from math import trunc
+
+from flask import Flask,render_template,request,jsonify
 from .ai import get_move
-import requests # todo : peut être inutile 
+
+from flask import Flask, render_template
+from . import models
+from .models import Player, db, Game
+
 app = Flask(__name__)
 
 app.config.from_object('config')
@@ -12,164 +17,137 @@ def index():
 def content(content_id):
     return content_id
 @app.route('/game')
-  # Supposons que vous ayez déjà des joueurs dans la base de données.
-    # Vous pouvez récupérer les `id_player` des joueurs ou en créer de nouveaux.
 def jeu():
-    player1 = Player.query.filter_by(name="Player 1").first()
-    player2 = Player.query.filter_by(name="Player IA").first()
+    return render_template('game.html')
 
-    # Si les joueurs n'existent pas, vous pouvez les créer ici.
-    if not player1:
-        player1 = Player(name="Player 1", is_human=True)
+@app.route("/start_game", methods=['POST'])
+def start_game():
+    Game.query.delete()
+    # Example setup for creating or fetching players
+    player1 = Player.query.filter_by(name="Player1").first() or Player(name="Player1", is_human=True)
+    player2 = Player.query.filter_by(name="Player2").first() or Player(name="Player2", is_human=False)
+
+    # Add players to the session if they don’t exist in the database
+    if not player1.id_player:
         db.session.add(player1)
-        db.session.commit()  
-    
-    if not player2:
-        player2 = Player(name="Player IA", is_human=False)
+    if not player2.id_player:
         db.session.add(player2)
+
+    db.session.commit()  # Commit to ensure players are saved and have IDs
+
+    # Now initialize the game with player IDs
+    new_game = Game(player1_id=player1.id_player, player2_id=player2.id_player,table_size=5)
+    db.session.add(new_game)
+    db.session.commit()
+
+    print(f"Player 1 ID: {player1.id_player}")
+    print(f"Player 2 ID: {player2.id_player}")
+
+    size= 5
+    gameState = {
+        "board": [["0" for _ in range(size)] for _ in range(size)],  # Use '0' for empty cells
+        "posPlayer1": {"x": 0, "y": 0},
+        "posPlayer2": {"x": size - 1, "y": size - 1},
+        "currentPlayer": 1
+    }
+    new_game.boxes = "1xxxx xxxxx xxxxx xxxxx xxxx2"
+
+
+    # Mark initial player positions on the board
+    gameState["board"][0][0] = "1"  # Player 1 represented by '1'
+    gameState["board"][size - 1][size - 1] = "2"  # Player 2 represented by '2'
+
+    db.session.commit()
+    return jsonify({
+        "status": "success",
+        "gameId": new_game.id_game,
+        "gameState": gameState
+    })
+
+@app.route('/gameboard', methods=['GET'])
+def get_board():
+    current_game = db.session.query(Game).first()  # Get the first game record
+    if current_game:
+        # Assuming current_game.boxes holds the board state as a string
+        return jsonify({"board": current_game.boxes})  # Return the board as a JSON object
+    else:
+        return jsonify({"error": "Game not found"}), 404
+@app.route('/validate_move', methods=['POST'])
+def check_move_validity():
+    # Get `i` and `j` from query parameters
+    data = request.get_json()
+    i = data.get('i')
+    j = data.get('j')
+    is_valid = move_validation(i, j)
+    if (is_valid):
+        current_game = db.session.query(Game).first()
+        if (current_game.current_player == current_game.player1_id):
+            current_game.playerpos1_x = i
+            current_game.playerpos1_y = j
+            current_game.current_player = current_game.player2_id
+        else:
+            current_game.current_player = current_game.player1_id
+            current_game.playerpos2_x = i
+            current_game.playerpos2_y = j
         db.session.commit()
 
-    # Créer une instance de `Game` avec les `id` des deux joueurs
-    table_size = 5  # Par exemple, la taille de la table (peut être passée en paramètre)
-    new_game = Game(player1_id=player1.id_player, player2_id=player2.id_player, table_size=table_size)
-    db.session.add(new_game)
-    db.session.commit()  # Sauvegarde le jeu pour obtenir `id_game`
-    #print("id game : ", new_game.id_game)
-    #print("id player 1: ", player1.id_player)
-    #print("id player 2: ", player2.id_player)
 
-    # Passer `id_game` à la vue pour l'utiliser dans le frontend
-    return render_template('game.html', game_id=new_game.id_game, grid_state = new_game.boxes )
-
-# give -1 if the movement is not ok else give the new position of the player and an up to date array_string
-def is_valid_movement(movement, array_string, player):
-    # Convertit array_string en une grille de caractères
-    print("is valid début : array :", array_string)
-    lines = array_string.strip().split(' ')
-    grid = [list(line) for line in lines]
-    n = len(grid)  # Dimension de la grille
-    # Calcule la nouvelle position
-    
-    new_x = player["x"] + movement["x"]
-    new_y = player["y"] + movement["y"]
-    # Vérifie les limites de la grille et la présence d'un obstacle
-    if not (0 <= new_x < n and 0 <= new_y < n):
-        return -1  # Mouvement non autorisé
-    
-    if grid[new_y][new_x] == 'x' or int(grid[new_y][new_x]) == int( player["symbol"]):
-        
-        # Mouvement autorisé, mise à jour de la grille
-        grid[new_y][new_x] = player["symbol"]  # La nouvelle position prend le symbole du joueur
-        
-        # Reconstruit array_string avec la grille mise à jour
-        modified_array_string = ' '.join(''.join(row) for row in grid)
-        # Retourne la nouvelle position et la grille mise à jour
-        return new_x, new_y, modified_array_string
-    else :
-        return -1
-#version pour jouer avec soit même,  retirer le _NULL du chemin pour le rendre valide, et adapté les autres chemins en conséquence 
-@app.route('/travel_request_NULL', methods=['POST'])
-def travel_request_NULL():
-    data = request.json # récupére les données du client 
-    movement_x = data.get("current_x")
-    movement_y = data.get("current_y")
-
-    game_id = data.get("game_id")
-    current_game = Game.query.get(game_id)
-
-    player_symbol = "1" if current_game.current_player == current_game.player1_id else "2"
-    player_x = current_game.playerpos1_x if player_symbol == "1" else current_game.playerpos2_x
-    player_y = current_game.playerpos1_y if player_symbol == "1" else current_game.playerpos2_y
-    array_string = current_game.boxes
-
-    result = is_valid_movement({"x": movement_x, "y": movement_y},array_string,{"x": player_x, "y":player_y, "symbol": player_symbol})
-    
-    if result == - 1 :
-        return "-1"
-
-    new_x, new_y, array_string = result
-    new_player_x, new_player_y, last_player_y, last_player_x = current_game.apply_movement(new_x,new_y,array_string)
-
-    movement = get_move(game_id)
-
-    return jsonify({"new_grid" : array_string, "new_current_player_x" : new_player_x, "new_current_player_y" : new_player_y, "other_x": last_player_x, "other_y": last_player_y })
-
-def check_winner(grid_string):
-    """
-    Vérifie si la partie est terminée et détermine le gagnant.
-    
-    Paramètres:
-        grid_string (str): Une chaîne représentant l'état de la grille.
-        
-    Retourne:
-        int: 1 si le joueur humain a gagné, 2 si l'IA a gagné, 0 s'il n'y a pas encore de gagnant.
-    """
-    # Vérifie s'il reste des "x" dans la grille
-    if "x" in grid_string:
-        return 0  # Le jeu n'est pas encore terminé
-    
-    # Compte les occurrences de "1" (joueur humain) et "2" (IA) dans la grille
-    count_player1 = grid_string.count("1")
-    count_player2 = grid_string.count("2")
-    
-    # Détermine le gagnant en fonction des compteurs
-    if count_player1 > count_player2:
-        return 1  # Le joueur humain a gagné
-    elif count_player2 > count_player1:
-        return 2  # L'IA a gagné
+    return jsonify({'valid': is_valid})
+def move_validation(i,j):
+    current_game = db.session.query(Game).first()
+    currPlayer = current_game.current_player
+    if (currPlayer == current_game.player1_id):
+        playerX= current_game.playerpos1_x
+        playerY= current_game.playerpos1_y
     else:
-        return 3  # Égalité ou aucun gagnant déterminé (optionnel)
+        playerX = current_game.playerpos2_x
+        playerY = current_game.playerpos2_y
+    diffX = i -playerX
+    diffY = j -playerY
+    if (abs(diffX) == 1 and diffY == 0):   # Horizontal move
+        return checkOtherPlayerCases(i,j)
+    elif (diffX == 0 and abs(diffY) == 1): # Vertical move
+        return checkOtherPlayerCases(i,j)
 
-#version pour jouer contre une IA aléatoire 
-@app.route('/travel_request', methods=['POST'])
-def travel_request():
-    # partie pour prendre en compte le mouvement du joueur humain
-    data = request.json # récupére les données du client 
-    print("  ------------  travel request : partie humain") 
-    movement_x = data.get("current_x")
-    movement_y = data.get("current_y")
+    else:
+        return False
 
-    game_id = data.get("game_id")
-    current_game = Game.query.get(game_id)
 
-    player_symbol = "1" 
-    player_x = current_game.playerpos1_x
-    player_y = current_game.playerpos1_y 
-    array_string = current_game.boxes
-    # résultat du tableau par rapport au mouvement de l'humain
-    result_human = is_valid_movement({"x": movement_x, "y": movement_y},array_string,{"x": player_x, "y":player_y, "symbol": player_symbol})
-    
-    
+def checkOtherPlayerCases(i, j):
+    current_game = db.session.query(Game).first()
+    currPlayer = str(current_game.current_player)  # Ensure currPlayer is a string for comparison
+    boxes = current_game.boxes
 
-    if result_human == - 1 :
-        return "-1"
+    # Split boxes into a list of lists for easier manipulation
+    boxes_segments = [list(row) for row in boxes.split()]
 
-    new_x_human, new_y_human, array_string_human = result_human
-    # pour enregister les nouvelles positions, et position, et passé la main à l'IA 
-    last_player_x,last_player_y, new_player_x, new_player_y = current_game.apply_movement(new_x_human,new_y_human,array_string_human)
-    db.session.commit() 
-    
-    # partie pour prendre en compte le mouvement de l'IA 
+    i = i-1
+    j = j-1
 
-    print (" ------------  travel request : partie IA ")
+    # Check if the target cell is occupied by the current player
+    print("segment")
+    print(boxes_segments[i][j])
+    if boxes_segments[i][j] != currPlayer and boxes_segments[i][j] != 'x':
+        return False  # The cell is already occupied by the current player
 
-    result_IA = -1 
-    while result_IA == -1 :
-        movement = get_move() 
-        
-        player_symbol_IA = "2"
-        player_x_IA = current_game.playerpos2_x
-        player_y_IA = current_game.playerpos2_y
+    # Check if the cell is occupied by another player
+    for a in range(len(boxes_segments)):
+        for b in range(len(boxes_segments[a])):
+            if a == i and b == j:
+                # Update the board state to reflect the current player's move
+                if (currPlayer == str(current_game.player1_id)):
+                    boxes_segments[a][b] = '1'
+                elif (currPlayer == str(current_game.player2_id)):
+                    boxes_segments[a][b] = '2'
+                break  # Break the inner loop once we update
 
-        result_IA = is_valid_movement({"x": movement["x"], "y": movement["y"]},array_string_human, {"x": player_x_IA, "y":player_y_IA, "symbol": player_symbol_IA})
-  
-    db.session.commit() 
-    # partie pour renvoyer le résultat au joueur sous la forme d'une modification html/JS
+    # Convert the list of lists back to the original string format
+    updated_boxes = ' '.join(''.join(row) for row in boxes_segments)
 
-    new_x_IA, new_y_IA, array_string_IA = result_IA
-    new_player_x, new_player_y, last_player_x,last_player_y = current_game.apply_movement(new_x_IA,new_y_IA,array_string_IA)
+    # Update the current_game object with the new board state
+    current_game.boxes = updated_boxes
 
-    winner = check_winner(array_string_IA)
+    # Commit the changes to the database
+    db.session.commit()
 
-    print( "H-x :", new_player_x, "H-y ", new_player_y,"IA-x ", last_player_x,"IA-y ",last_player_y )
-    return jsonify({"new_grid" : array_string_IA, "new_current_player_x" : new_player_x, "new_current_player_y" : new_player_y, "other_x": last_player_x, "other_y": last_player_y, "winner" : winner })
+    return True  # The move was valid and the board has been updated
