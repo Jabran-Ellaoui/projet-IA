@@ -1,5 +1,5 @@
 from conquest_squares_game import app
-import requests
+
 
 
 

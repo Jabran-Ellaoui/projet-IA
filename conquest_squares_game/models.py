@@ -31,7 +31,7 @@ class Game(db.Model):
     boxes = db.Column(db.String(25), nullable=False) # une lettre représente une case, 1 pour joueur 1, 2 joueur 2 ,
     # 0 aucun joueur. 25 lettres, lignes espacées par un espace ducoup xxxxx xxxxx xxxxx xxxxx xxxxx
 
-    def __init__(self, player1_id, player2_id, ):
+    def __init__(self, player1_id, player2_id,table_size ):
         self.player1_id = player1_id
         self.player2_id = player2_id
         self.playerpos1_x = 1
@@ -39,8 +39,11 @@ class Game(db.Model):
         self.playerpos2_x = 5
         self.playerpos2_y = 5
         self.current_player= self.player1_id
-        self.boxes = "1xxxx xxxxx xxxxx xxxxx xxxx2"
-        self.winner_id = None
+        self.boxes = self.boxes = "".join([
+                "1" + "x" * (table_size - 1),
+                " " + ("x" * table_size + " ") * (table_size - 2),
+                "x" * (table_size - 1) + "2"
+        ])
 
 
 def init_db():

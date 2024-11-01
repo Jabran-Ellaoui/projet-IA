@@ -16,6 +16,7 @@
             border: 1px solid black;
             text-align: center;
             vertical-align: middle;
+            cursor: pointer;
         }
 
         .player1 {
@@ -35,182 +36,165 @@
 
     <h2 id="turnMessage">C'est au tour de Joueur 1 de jouer !</h2>
 
-    <table>
+    <table id="gameGrid">
         <tbody>
-            <script>
-                // Initial positions of players
-                let currentPlayer = 1;
-                let player1Pos = { x: 0, y: 0 };  // Player 1 starts at top-left
-                let player2Pos = { x: 4, y: 4 };  // Player 2 starts at bottom-right
-
-                // Function to change the turn and update the message
-                function changeTurn() {
-                    currentPlayer = currentPlayer === 1 ? 2 : 1;
-                    document.getElementById('turnMessage').innerText =
-                        "C'est au tour de Joueur " + currentPlayer + " de jouer !";
-                }
-
-                // Check if a move is valid (adjacent cells or already owned cell)
-                function isMoveValid(x, y, cell) {
-                    let playerPos = currentPlayer === 1 ? player1Pos : player2Pos;
-                    let distance = Math.abs(playerPos.x - x) + Math.abs(playerPos.y - y);
-
-                    // Check if it's an adjacent cell or an already owned cell
-                    if (distance === 1 ||
-                        (currentPlayer === 1 && cell.classList.contains('player1')) ||
-                        (currentPlayer === 2 && cell.classList.contains('player2'))) {
-                        return true;
-                    }
-                    return false;
-                }
-
-                async function markCell(cell, x, y) {
-    if (isMoveValid(x, y, cell)) {
-        // Remove the current player's marker from the old position
-        let playerPos = currentPlayer === 1 ? player1Pos : player2Pos;
-        let oldCell = document.getElementById('cell-' + playerPos.x + '-' + playerPos.y);
-        oldCell.classList.remove('occupied');
-        oldCell.innerText = '';  // Clear text
-
-        // Color the new cell and update the player's position
-        if (currentPlayer === 1) {
-            player1Pos = { x: x, y: y };
-            cell.classList.add('player1', 'occupied');
-            cell.innerText = 'J1';
-        } else {
-            player2Pos = { x: x, y: y };
-            cell.classList.add('player2', 'occupied');
-            cell.innerText = 'J2';
-        }
-
-        // Send the move to the server
-        let response = await fetch('/play', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                x: x,
-                y: y,
-                player: currentPlayer,
-            }),
-        });
-
-        if (response.ok) {
-            let result = await response.json();
-            console.log(result);  // Debug
-
-            // Update the board based on the server response
-            updateBoard(result.gameState.board);
-            
-            // Update currentPlayer based on server response
-            currentPlayer = result.gameState.currentPlayer; // Update current player
-            
-            // Update the turn message after the turn change
-            changeTurn(); // Update turn message
-        } else {
-            let errorData = await response.json();
-            alert("Erreur lors du mouvement: " + errorData.message);
-        }
-    } else {
-        alert("Déplacement invalide. Vous ne pouvez bouger qu'autour de votre position ou sur une case déjà possédée.");
-    }
-}
-
-                // Function to update the board based on the game state
-                function updateBoard(boxes) {
-    for (let i = 0; i < boxes.length; i++) {
-        let row = boxes[i];
-        for (let j = 0; j < row.length; j++) {
-            let cellId = 'cell-' + i + '-' + j;
-            let cell = document.getElementById(cellId);
-
-            // Clear previous states
-            cell.innerText = '';
-            cell.classList.remove('player1', 'player2', 'occupied');
-
-            // Apply ownership based on the boxes state
-            if (row[j] === "1") {
-                cell.classList.add('player1', 'occupied');
-                cell.innerText = 'J1';
-            } else if (row[j] === "2") {
-                cell.classList.add('player2', 'occupied');
-                cell.innerText = 'J2';
-            }
-        }
-    }
-}
-
-                async function fetchGameState() {
-    try {
-        const response = await fetch('/game_state');
-        const text = await response.text();  // Read the raw response text
-        console.log("Raw response:", text);   // Log the raw response
-
-        // Check if the response is OK
-        if (!response.ok) {
-            throw new Error("Failed to fetch game state");
-        }
-
-        const gameState = JSON.parse(text);  // Parse the text as JSON
-        console.log("Game State:", gameState);
-
-        // Update the board using the received data
-        updateBoard(gameState.board);
-        currentPlayer = gameState.currentPlayer; // Set the current player
-    } catch (error) {
-        console.error("Error fetching game state:", error);
-    }
-}
-                // Function to initialize the game state
-                async function initializeGame() {
-    try {
-        const response = await fetch('/start_game', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-
-        const text = await response.text(); // Read the raw response text
-        console.log("Start game response:", text); // Log the response text
-
-        if (response.ok) {
-            await fetchGameState(); // Fetch the game state after starting
-        } else {
-            throw new Error("Could not start the game. Server responded with: " + text);
-        }
-    } catch (error) {
-        console.error("Error starting game:", error);
-        alert("Could not start the game. Please try again.");
-    }
-}
-
-                // Generate the 5x5 grid
-                for (let i = 0; i < 5; i++) {
-                    document.write('<tr>');
-                    for (let j = 0; j < 5; j++) {
-                        let cellId = 'cell-' + i + '-' + j;
-                        if (i === 0 && j === 0) {
-                            // Initial position of Player 1
-                            document.write('<td id="' + cellId + '" class="player1 occupied">J1</td>');
-                        } else if (i === 4 && j === 4) {
-                            // Initial position of Player 2
-                            document.write('<td id="' + cellId + '" class="player2 occupied">J2</td>');
-                        } else {
-                            // Empty cells, click to mark the cell
-                            document.write('<td id="' + cellId + '" onclick="markCell(this, ' + i + ', ' + j + ')"></td>');
-                        }
-                    }
-                    document.write('</tr>');
-                }
-
-                // Automatically start the game when the page loads
-                window.onload = initializeGame;
-
-            </script>
+            <!-- Grid will be generated by JavaScript -->
         </tbody>
     </table>
 
+    <script>
+        // Initialize game state
+        let gameState = {
+            players: {
+                player1: { id: 1, position: { x: 0, y: 0 }, name: "Player 1" },
+                player2: { id: 2, position: { x: 4, y: 4 }, name: "Player 2" },
+            },
+            currentPlayer: 1,
+        };
+
+        
+
+        // Function to generate the grid
+        function generateGrid() {
+    const grid = document.getElementById('gameGrid').getElementsByTagName('tbody')[0];
+    
+    // Clear existing grid if necessary
+    grid.innerHTML = '';
+
+    for (let i = 0; i < 5; i++) {
+        const row = document.createElement('tr');
+        for (let j = 0; j < 5; j++) {
+            const cell = document.createElement('td');
+            cell.id = `cell-${i}-${j}`;
+            cell.onclick = () => fetchValidMove(i+1, j+1); // Click handler for each cell
+            row.appendChild(cell);
+        }
+        grid.appendChild(row);
+    }
+}
+async function fetchAndPaintBoard() {
+    try {
+        const response = await fetch("http://127.0.0.1:5000/gameboard");
+        if (!response.ok) {
+            throw new Error("Network response was not OK");
+        }
+
+        const data = await response.json();
+        if (data.board) {
+            const boardArray = data.board.split(' '); // Adjust based on how your board is structured
+            const grid = document.getElementById('gameGrid').getElementsByTagName('tbody')[0];
+
+            // Clear the existing board before painting
+            for (let i = 0; i < 5; i++) {
+                for (let j = 0; j < 5; j++) {
+                    const cell = grid.querySelector(`#cell-${i}-${j}`);
+                    const cellValue = boardArray[i][j];
+
+                    // Set cell color based on the value
+                    if (cellValue === '1') {
+                        cell.style.backgroundColor = 'blue'; // Player 1
+                        cell.innerText = 'J1';
+                    } else if (cellValue === '2') {
+                        cell.style.backgroundColor = 'red'; // Player 2
+                        cell.innerText = 'J2';
+                    } else {
+                        cell.style.backgroundColor = 'white'; // Empty cell
+                        cell.innerText = '';
+                    }
+                }
+            }
+        } else {
+            console.error("No board data in response:", data);
+        }
+    } catch (error) {
+        console.error("Error fetching board:", error);
+    }
+}
+
+        // Function to start the game
+        async function startGame() {
+            try {
+                const response = await fetch("http://127.0.0.1:5000/start_game", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error("Network response was not OK");
+                }
+
+                const data = await response.json();
+                console.log("Game started:", data);
+
+                if (data.status === "success") {
+                    // Initialize game state with the server response
+                    initializeGameState(data.gameState);
+                } else {
+                    console.error("Failed to start the game:", data);
+                }
+            } catch (error) {
+                console.error("Error starting game:", error);
+            }
+        }
+
+        // Function to initialize the game state based on the received data
+        function initializeGameState(gameStateData) {
+            // Update player positions and game state based on server data
+            gameState.players.player1.position = gameStateData.posPlayer1;
+            gameState.players.player2.position = gameStateData.posPlayer2;
+            gameState.currentPlayer = gameStateData.currentPlayer;
+            fetchAndPaintBoard()
+
+            // Log the updated state
+            console.log("Updated game state:", gameState);
+        }
+
+        // Ensure the board is generated before calling startGame
+        window.onload = function() {
+            generateGrid();  // Generate the grid first
+            startGame();
+            fetchAndPaintBoard()     // Then call startGame to initialize the game
+        };
+
+        // Function to fetch the game board (if needed)
+        async function fetchBoard() {
+            try {
+                const response = await fetch("http://127.0.0.1:5000/gameboard");
+                if (!response.ok) {
+                    throw new Error("Network response was not OK");
+                }
+
+                const boardString = await response.text();  // Use .text() for non-JSON responses
+                console.log("Board:", boardString);
+                return boardString;
+            } catch (error) {
+                console.error("Fetch error:", error);
+            }
+        }
+        async function fetchValidMove(i, j) {
+    try {
+        const response = await fetch("http://127.0.0.1:5000/validate_move", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ i: i, j: j })
+        });
+
+        if (!response.ok) {
+            throw new Error("Network response was not OK");
+        }
+
+        const data = await response.json();
+        console.log("Valid move response:", data);
+        fetchAndPaintBoard()
+        return data;
+    } catch (error) {
+        console.error("Error fetching valid move:", error);
+    }
+}
+    </script>
 </body>
 </html>

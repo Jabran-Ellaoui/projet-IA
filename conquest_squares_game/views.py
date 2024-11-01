@@ -1,14 +1,13 @@
-from flask import Flask, render_template, request,jsonify
-from . import models
+from math import trunc
+
+from flask import Flask,render_template,request,jsonify
 from .ai import get_move
-from .models import Player, Game, db
-import random
-import requests
+
+from flask import Flask, render_template
+from . import models
+from .models import Player, db, Game
 
 app = Flask(__name__)
-
-
-
 
 app.config.from_object('config')
 
@@ -21,135 +20,134 @@ def content(content_id):
 def jeu():
     return render_template('game.html')
 
-
-@app.route('/start_game', methods=['POST'])
+@app.route("/start_game", methods=['POST'])
 def start_game():
-    # Reset game state to initial conditions
-    global gameState
+    Game.query.delete()
+    # Example setup for creating or fetching players
+    player1 = Player.query.filter_by(name="Player1").first() or Player(name="Player1", is_human=True)
+    player2 = Player.query.filter_by(name="Player2").first() or Player(name="Player2", is_human=False)
 
-    # Ensure your player creation logic is in place.
-    # Replace these with your actual player retrieval/creation logic.
-    player1 = Player(name='Player 1', is_human=True)  # Example: create or get the first player
-    player2 = Player(name='Player 2', is_human=True)  # Example: create or get the second player
+    # Add players to the session if they don’t exist in the database
+    if not player1.id_player:
+        db.session.add(player1)
+    if not player2.id_player:
+        db.session.add(player2)
 
-    # Add players to the database
-    db.session.add(player1)
-    db.session.add(player2)
-    db.session.commit()  # Commit to save players
+    db.session.commit()  # Commit to ensure players are saved and have IDs
 
-    # Create the game instance in the database
-    new_game = Game(player1_id=player1.id_player, player2_id=player2.id_player)
+    # Now initialize the game with player IDs
+    new_game = Game(player1_id=player1.id_player, player2_id=player2.id_player,table_size=5)
     db.session.add(new_game)
-    db.session.commit()  # Commit to save the game
+    db.session.commit()
 
-    # Initialize game state in memory (optional)
-    BOARD_SIZE = 5
+    print(f"Player 1 ID: {player1.id_player}")
+    print(f"Player 2 ID: {player2.id_player}")
+
+    size= 5
     gameState = {
-        "board": [["0" for _ in range(BOARD_SIZE)] for _ in range(BOARD_SIZE)],  # Use '0' for empty cells
+        "board": [["0" for _ in range(size)] for _ in range(size)],  # Use '0' for empty cells
         "posPlayer1": {"x": 0, "y": 0},
-        "posPlayer2": {"x": BOARD_SIZE - 1, "y": BOARD_SIZE - 1},
+        "posPlayer2": {"x": size - 1, "y": size - 1},
         "currentPlayer": 1
     }
+    new_game.boxes = "1xxxx xxxxx xxxxx xxxxx xxxx2"
+
 
     # Mark initial player positions on the board
     gameState["board"][0][0] = "1"  # Player 1 represented by '1'
-    gameState["board"][BOARD_SIZE - 1][BOARD_SIZE - 1] = "2"  # Player 2 represented by '2'
+    gameState["board"][size - 1][size - 1] = "2"  # Player 2 represented by '2'
 
-    # Update the game instance's boxes representation
-    new_game.boxes = "1xxxx xxxxx xxxxx xxxxx xxxx2"  # Example box initialization
-    db.session.commit()  # Save the updated game state in the database
-
-    # Return a response with the game ID and initial game state
+    db.session.commit()
     return jsonify({
         "status": "success",
         "gameId": new_game.id_game,
         "gameState": gameState
-    }), 200
+    })
 
-
-
-
-# Fonction pour vérifier si un mouvement est valide
-def isMoveValid(playerPos, x, y):
-    distance = abs(playerPos["x"] - x) + abs(playerPos["y"] - y)
-    return distance == 1 and gameState["board"][x][y] == ""
-
-# Fonction pour trouver les mouvements valides autour d'une position
-def getValidMoves(playerPos):
-    x, y = playerPos["x"], playerPos["y"]
-    possible_moves = [
-        (x - 1, y), (x + 1, y),  # Haut et bas
-        (x, y - 1), (x, y + 1)   # Gauche et droite
-    ]
-    return [(nx, ny) for nx, ny in possible_moves if 0 <= nx < BOARD_SIZE and 0 <= ny < BOARD_SIZE and isMoveValid(playerPos, nx, ny)]
-
-# Fonction pour le mouvement aléatoire de l'IA
-def aiMove():
-    validMove = getValidMoves(gameState["posPlayer2"])
-    if validMove:
-        x, y = random.choice(validMove)
-        gameState["board"][gameState["posPlayer2"]["x"]][gameState["posPlayer2"]["y"]] = ""
-        gameState["board"][x][y] = "J2"
-        gameState["posPlayer2"] = {"x": x, "y": y}
-
-# On doit créer une route qui va venir récupérer le mouvement via la méthode post (DIFFERENT DU GAME qu'on af ait)
-@app.route('/play', methods=['POST'])
-def play():
-    data = request.json
-    x = data['x']
-    y = data['y']
-    player_id = data['player']
-
-    # Retrieve the current game instance (you may need to modify this to get the specific game)
-    game = Game.query.first()  # Fetch the first game for simplicity
-
-    # Validate the move
-    boxes_list = list(game.boxes.replace(" ", ""))  # Remove spaces for easier manipulation
-    index = x * 5 + y  # Calculate the index for the 5x5 grid
-
-    if boxes_list[index] == 'x' and player_id == game.current_player:  # Valid move
-        # Update the board
-        boxes_list[index] = '1' if player_id == game.player1_id else '2'
-
-        # Update player positions (not shown here, but you'd typically want to move based on game logic)
-        if player_id == game.player1_id:
-            game.playerpos1_x, game.playerpos1_y = x, y
-        else:
-            game.playerpos2_x, game.playerpos2_y = x, y
-
-        # Update the current player
-        game.current_player = game.player2_id if player_id == game.player1_id else game.player1_id
-
-        # Update the boxes back to string format
-        game.boxes = "".join(boxes_list[:5]) + " " + "".join(boxes_list[5:10]) + " " + \
-                     "".join(boxes_list[10:15]) + " " + "".join(boxes_list[15:20]) + " " + \
-                     "".join(boxes_list[20:25])
-
-        db.session.commit()  # Commit changes to the database
-
-        return jsonify({'gameState': {
-            'board': game.boxes.split(" "),  # Send the updated board back to the client
-            'currentPlayer': game.current_player
-        }})
+@app.route('/gameboard', methods=['GET'])
+def get_board():
+    current_game = db.session.query(Game).first()  # Get the first game record
+    if current_game:
+        # Assuming current_game.boxes holds the board state as a string
+        return jsonify({"board": current_game.boxes})  # Return the board as a JSON object
     else:
-        return jsonify({'status': 'invalid_move', 'message': 'Invalid move or cell already occupied.'}), 400
+        return jsonify({"error": "Game not found"}), 404
+@app.route('/validate_move', methods=['POST'])
+def check_move_validity():
+    # Get `i` and `j` from query parameters
+    data = request.get_json()
+    i = data.get('i')
+    j = data.get('j')
+    is_valid = move_validation(i, j)
+    if (is_valid):
+        current_game = db.session.query(Game).first()
+        if (current_game.current_player == current_game.player1_id):
+            current_game.playerpos1_x = i
+            current_game.playerpos1_y = j
+            current_game.current_player = current_game.player2_id
+        else:
+            current_game.current_player = current_game.player1_id
+            current_game.playerpos2_x = i
+            current_game.playerpos2_y = j
+        db.session.commit()
 
-@app.route('/game_state', methods=['GET'])
-def get_game_state():
-    game = Game.query.first()  # Retrieve the current game (adjust as needed)
-    if game is None:
-        return jsonify({"error": "Game not found."}), 404  # Handle the case where game is not found
-    # Decode the `boxes` string into a 5x5 array
-    boxes_grid = []
-    for i in range(5):
-        row = list(game.boxes[i * 5:(i + 1) * 5])  # Take 5 characters per row
-        boxes_grid.append(row)
 
-    game_state = {
-        "board": boxes_grid,
-        "posPlayer1": {"x": game.playerpos1_x, "y": game.playerpos1_y},
-        "posPlayer2": {"x": game.playerpos2_x, "y": game.playerpos2_y},
-        "currentPlayer": game.current_player
-    }
+    return jsonify({'valid': is_valid})
+def move_validation(i,j):
+    current_game = db.session.query(Game).first()
+    currPlayer = current_game.current_player
+    if (currPlayer == current_game.player1_id):
+        playerX= current_game.playerpos1_x
+        playerY= current_game.playerpos1_y
+    else:
+        playerX = current_game.playerpos2_x
+        playerY = current_game.playerpos2_y
+    diffX = i -playerX
+    diffY = j -playerY
+    if (abs(diffX) == 1 and diffY == 0):   # Horizontal move
+        return checkOtherPlayerCases(i,j)
+    elif (diffX == 0 and abs(diffY) == 1): # Vertical move
+        return checkOtherPlayerCases(i,j)
 
-    return jsonify(game_state), 200
+    else:
+        return False
+
+
+def checkOtherPlayerCases(i, j):
+    current_game = db.session.query(Game).first()
+    currPlayer = str(current_game.current_player)  # Ensure currPlayer is a string for comparison
+    boxes = current_game.boxes
+
+    # Split boxes into a list of lists for easier manipulation
+    boxes_segments = [list(row) for row in boxes.split()]
+
+    i = i-1
+    j = j-1
+
+    # Check if the target cell is occupied by the current player
+    print("segment")
+    print(boxes_segments[i][j])
+    if boxes_segments[i][j] != currPlayer and boxes_segments[i][j] != 'x':
+        return False  # The cell is already occupied by the current player
+
+    # Check if the cell is occupied by another player
+    for a in range(len(boxes_segments)):
+        for b in range(len(boxes_segments[a])):
+            if a == i and b == j:
+                # Update the board state to reflect the current player's move
+                if (currPlayer == str(current_game.player1_id)):
+                    boxes_segments[a][b] = '1'
+                elif (currPlayer == str(current_game.player2_id)):
+                    boxes_segments[a][b] = '2'
+                break  # Break the inner loop once we update
+
+    # Convert the list of lists back to the original string format
+    updated_boxes = ' '.join(''.join(row) for row in boxes_segments)
+
+    # Update the current_game object with the new board state
+    current_game.boxes = updated_boxes
+
+    # Commit the changes to the database
+    db.session.commit()
+
+    return True  # The move was valid and the board has been updated
