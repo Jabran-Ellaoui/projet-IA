@@ -1,4 +1,6 @@
-from flask import Flask, render_template, request, jsonify 
+import time
+
+from flask import Flask, render_template, request, jsonify
 from .models import db, Player, Game
 from .ai import get_move
 from sqlalchemy.exc import SQLAlchemyError
@@ -49,6 +51,9 @@ def travel_request():
 
     game_id = data.get("game_id")
     current_game = Game.query.get(game_id)
+    player1_id = current_game.player1_id
+    player2_id = current_game.player2_id
+    current_player= current_game.current_player
 
     player_symbol = "1" 
     player_x = current_game.playerpos1_x
@@ -59,22 +64,24 @@ def travel_request():
 
     if result_human == - 1 :
         return "-1"
-
-    new_x_human, new_y_human, array_string_human = result_human
-    # pour enregister les nouvelles positions, et position, et passé la main à l'IA 
-    last_player_x,last_player_y, new_player_x, new_player_y = current_game.apply_movement(new_x_human,new_y_human,array_string_human)
-    db.session.commit() 
+    if (current_player == player1_id):
+        new_x_human, new_y_human, array_string_human = result_human
+        # pour enregister les nouvelles positions, et position, et passé la main à l'IA
+        last_player_x,last_player_y, new_player_x, new_player_y = current_game.apply_movement(new_x_human,new_y_human,array_string_human)
+        current_player = player2_id
+        db.session.commit()
 
     result_IA = -1 
-    while result_IA == -1 :
-        movement = get_move() 
+    while result_IA == -1 and current_player == player2_id:
+        movement = get_move()
+        time.sleep(0.5)
         
         player_symbol_IA = "2"
         player_x_IA = current_game.playerpos2_x
         player_y_IA = current_game.playerpos2_y
 
         result_IA = is_valid_movement({"x": movement["x"], "y": movement["y"]},array_string_human, {"x": player_x_IA, "y":player_y_IA, "symbol": player_symbol_IA})
-  
+    current_player = player1_id
     db.session.commit() 
 
     new_x_IA, new_y_IA, array_string_IA = result_IA
