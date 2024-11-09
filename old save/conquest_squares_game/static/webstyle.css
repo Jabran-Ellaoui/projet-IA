@@ -1,0 +1,47 @@
+/* styles/webstyle.css */
+body 
+{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background: linear-gradient(to bottom, #87CEFA, #B0E0E6); /* Dégradé bleu ciel */
+    font-family: Arial, sans-serif; /* Police de caractères */
+}
+
+h1 
+{
+    text-align: center; /* Centrer le titre */
+    margin-bottom: 20px; /* Espace en dessous du titre */
+}
+
+button 
+{
+    padding: 10px 20px; /* Padding du bouton */
+    font-size: 16px; /* Taille de police du bouton */
+    cursor: pointer; /* Curseur pointer sur le bouton */
+    border: none; /* Pas de bordure */
+    border-radius: 5px; /* Coins arrondis */
+    background-color: #4682B4; /* Couleur de fond du bouton */
+    color: white; /* Couleur du texte du bouton */
+    transition: background-color 0.3s; /* Transition pour le survol */
+}
+
+button:hover 
+{
+    background-color: #4169E1; /* Couleur au survol */
+}
+
+.introduction 
+{
+    margin-top: 20px; /* Espace au-dessus de l'explication */
+    text-align: center; /* Centrer le texte d'explication */
+    max-width: 600px; /* Largeur maximale de l'explication */
+    padding: 15px; /* Espacement interne */
+    border: 2px solid #4682B4; /* Bordure du bloc */
+    border-radius: 10px; /* Coins arrondis du bloc */
+    background-color: transparent; /* Couleur de fond du bloc */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Ombre du bloc */
+}
