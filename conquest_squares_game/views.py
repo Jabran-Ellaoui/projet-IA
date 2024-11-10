@@ -1,4 +1,9 @@
+<<<<<<< Updated upstream
 from math import trunc
+=======
+import time
+from collections import deque
+>>>>>>> Stashed changes
 
 from flask import Flask,render_template,request,jsonify
 from .ai import get_move
@@ -43,6 +48,7 @@ def start_game():
     print(f"Player 1 ID: {player1.id_player}")
     print(f"Player 2 ID: {player2.id_player}")
 
+<<<<<<< Updated upstream
     size= 5
     gameState = {
         "board": [["0" for _ in range(size)] for _ in range(size)],  # Use '0' for empty cells
@@ -51,6 +57,79 @@ def start_game():
         "currentPlayer": 1
     }
     new_game.boxes = "1xxxx xxxxx xxxxx xxxxx xxxx2"
+=======
+
+def checkBoard():
+    data = request.json
+    game_id = data.get("game_id")
+    current_game = Game.query.get(game_id)
+    grid = current_game.boxes
+
+    # Convert the grid string into a 2D list
+    board = [list(row) for row in grid.split()]
+    rows, cols = len(board), len(board[0])
+
+    def bfs(r, c):
+        queue = deque([(r, c)])
+        visited = set([(r, c)])
+        enclosing_players = set()
+        enclosed_region = [(r, c)]
+        is_enclosed = True
+
+        while queue:
+            x, y = queue.popleft()
+
+            # Explore neighbors
+            for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+                nx, ny = x + dx, y + dy
+
+                # If out of bounds, mark as not enclosed
+                if nx < 0 or nx >= rows or ny < 0 or ny >= cols:
+                    is_enclosed = True
+                    continue
+
+                cell = board[nx][ny]
+                if cell == 'x' and (nx, ny) not in visited:
+                    # Add cell to the region and continue exploration
+                    visited.add((nx, ny))
+                    queue.append((nx, ny))
+                    enclosed_region.append((nx, ny))
+                elif cell in {'1', '2'}:
+                    # Track the surrounding player
+                    enclosing_players.add(cell)
+
+        # If region is fully enclosed by one player and no boundary
+        if is_enclosed and len(enclosing_players) == 1:
+            enclosing_player = enclosing_players.pop()
+            # Update all enclosed 'x' cells
+            for x, y in enclosed_region:
+                board[x][y] = enclosing_player
+
+    # Check all cells in the board
+    for i in range(rows):
+        for j in range(cols):
+            if board[i][j] == 'x':
+                bfs(i, j)
+
+    # Update the game board back to string format
+    updated_grid = ' '.join([''.join(row) for row in board])
+    current_game.boxes = updated_grid
+    db.session.commit()
+    print(board)
+
+
+    # Update the game board back to string format
+    print(board)
+    updated_grid = ' '.join([''.join(row) for row in board])
+    current_game.boxes = updated_grid
+    db.session.commit()
+@app.route('/travel_request', methods=['POST'])
+def travel_request():
+    # partie pour prendre en compte le mouvement du joueur humain
+    data = request.json # récupére les données du client 
+    movement_x = data.get("current_x")
+    movement_y = data.get("current_y")
+>>>>>>> Stashed changes
 
 
     # Mark initial player positions on the board
@@ -91,6 +170,16 @@ def check_move_validity():
             current_game.playerpos2_y = j
         db.session.commit()
 
+<<<<<<< Updated upstream
+=======
+    result_IA = -1 
+    while result_IA == -1 and current_player == player2_id:
+        movement = get_move()
+        
+        player_symbol_IA = "2"
+        player_x_IA = current_game.playerpos2_x
+        player_y_IA = current_game.playerpos2_y
+>>>>>>> Stashed changes
 
     return jsonify({'valid': is_valid})
 def move_validation(i,j):
@@ -112,7 +201,12 @@ def move_validation(i,j):
     else:
         return False
 
+    checkBoard()
+    return jsonify({"new_grid" : array_string_IA, "new_current_player_x" : new_player_x, "new_current_player_y" : new_player_y, "other_x": last_player_x, "other_y": last_player_y, "winner" : winner })
 
+
+
+<<<<<<< Updated upstream
 def checkOtherPlayerCases(i, j):
     current_game = db.session.query(Game).first()
     currPlayer = str(current_game.current_player)  # Ensure currPlayer is a string for comparison
@@ -151,3 +245,5 @@ def checkOtherPlayerCases(i, j):
     db.session.commit()
 
     return True  # The move was valid and the board has been updated
+=======
+>>>>>>> Stashed changes
