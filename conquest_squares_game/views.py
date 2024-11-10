@@ -37,7 +37,7 @@ def jeu():
     table_size = 5  # Par exemple, la taille de la table (peut être passée en paramètre)
     new_game = Game(player1_id=player1.id_player, player2_id=player2.id_player, table_size=table_size)
     db.session.add(new_game)
-    db.session.commit() 
+    db.session.commit()
 
     # Passer `id_game` à la vue pour l'utiliser dans le frontend
     return render_template('game.html', game_id=new_game.id_game, grid_state = new_game.boxes )
@@ -99,14 +99,6 @@ def checkBoard():
     updated_grid = ' '.join([''.join(row) for row in board])
     current_game.boxes = updated_grid
     db.session.commit()
-    print(board)
-
-
-    # Update the game board back to string format
-    print(board)
-    updated_grid = ' '.join([''.join(row) for row in board])
-    current_game.boxes = updated_grid
-    db.session.commit()
 @app.route('/travel_request', methods=['POST'])
 def travel_request():
     # partie pour prendre en compte le mouvement du joueur humain
@@ -150,9 +142,11 @@ def travel_request():
 
     new_x_IA, new_y_IA, array_string_IA = result_IA
     new_player_x, new_player_y, last_player_x,last_player_y = current_game.apply_movement(new_x_IA,new_y_IA,array_string_IA)
+    checkBoard()
     winner = check_winner(array_string_IA)
 
-    checkBoard()
+
+    array_string_IA = current_game.boxes
     return jsonify({"new_grid" : array_string_IA, "new_current_player_x" : new_player_x, "new_current_player_y" : new_player_y, "other_x": last_player_x, "other_y": last_player_y, "winner" : winner })
 
 
