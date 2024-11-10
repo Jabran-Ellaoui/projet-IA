@@ -143,10 +143,8 @@ def travel_request():
     new_x_IA, new_y_IA, array_string_IA = result_IA
     new_player_x, new_player_y, last_player_x,last_player_y = current_game.apply_movement(new_x_IA,new_y_IA,array_string_IA)
     checkBoard()
-    winner = check_winner(array_string_IA)
-
-
     array_string_IA = current_game.boxes
+    winner = check_winner(array_string_IA)
     return jsonify({"new_grid" : array_string_IA, "new_current_player_x" : new_player_x, "new_current_player_y" : new_player_y, "other_x": last_player_x, "other_y": last_player_y, "winner" : winner })
 
 
