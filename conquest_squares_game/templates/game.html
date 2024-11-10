@@ -105,41 +105,52 @@
         }
 
         // Événement pour détecter les flèches directionnelles et envoyer le mouvement
-        document.addEventListener('keydown', async function (event) {
-            let x = 0, y = 0;
-            switch (event.key) {
-                case 'ArrowUp': y = -1; break;
-                case 'ArrowDown': y = 1; break;
-                case 'ArrowLeft': x = -1; break;
-                case 'ArrowRight': x = 1; break;
-                default: return;  // Ignore les autres touches
-            }
+        let isProcessing = false;  // Variable pour vérifier si une requête est en cours
 
-            // Envoyer la demande au serveur
-            const response = await fetch("http://127.0.0.1:5000/travel_request", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ "current_x": x, "current_y": y, "game_id": game_id })
-            }
-            );
+document.addEventListener('keydown', async function (event) {
+    if (isProcessing) return;  // Si une requête est déjà en cours, on ignore l'entrée
 
-            const result = await response.json();
-            if (result != "-1") 
-            {
-                generateGrid(result.new_grid,result.new_current_player_x,result.new_current_player_y, result.other_x, result.other_y);  // Met à jour la grille avec la nouvelle position
-                updateTurnMessage(result.winner)
-            }
+    let x = 0, y = 0;
+    switch (event.key) {
+        case 'ArrowUp': y = -1; break;
+        case 'ArrowDown': y = 1; break;
+        case 'ArrowLeft': x = -1; break;
+        case 'ArrowRight': x = 1; break;
+        default: return;  // Ignore les autres touches
+    }
+
+    // Mettre à jour l'état pour indiquer qu'une requête est en cours
+    isProcessing = true;
+
+    // Délai avant d'envoyer la requête (ici 10 ms)
+    await new Promise(resolve => setTimeout(resolve, 10));
+
+    try {
+        // Envoyer la demande au serveur
+        const response = await fetch("http://127.0.0.1:5000/travel_request", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ "current_x": x, "current_y": y, "game_id": game_id })
         });
+
+        const result = await response.json();
+        if (result != "-1") {
+            generateGrid(result.new_grid, result.new_current_player_x, result.new_current_player_y, result.other_x, result.other_y);  // Met à jour la grille avec la nouvelle position
+            updateTurnMessage(result.winner);
+        }
+    } catch (error) {
+        console.error("Erreur lors de la requête:", error);
+    } finally {
+        // Une fois la requête terminée (réussie ou en erreur), on remet isProcessing à false
+        isProcessing = false;
+    }
+});
 
         // Initialiser la grille
         document.addEventListener("DOMContentLoaded", function () {
             // Remplir la grille initiale (fournie depuis le serveur ou définie ici)
             generateGrid(grille, 0,0,4,4) //todo : hardcodé, aaahhhh
         });
-       
-
-
-    
 
     </script>
 

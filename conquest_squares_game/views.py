@@ -1,4 +1,5 @@
 import time
+from collections import deque
 
 from flask import Flask, render_template, request, jsonify
 from .models import db, Player, Game
@@ -16,8 +17,17 @@ def index():
 def content(content_id):
     return content_id
 
+'''
+    La fonction "jeu" est responsable de la gestion de la page du jeu, incluant la création des joueurs,
+    la création d'une nouvelle instance de jeu et l'envoi des informations pertinentes à la vue.
+
+    Paramètres :
+    - Aucun paramètre d'entrée pour cette fonction (utilisation d'un routeur Flask).
+
+    Résultat :
+    - Rendu de la vue "game.html" avec les informations du jeu, notamment l'ID du jeu et l'état initial de la grille (grid_state).
+    '''
 @app.route('/game')
- 
 def jeu():
     player1 = Player.query.filter_by(name="Player 1").first()
     player2 = Player.query.filter_by(name="Player IA").first()
@@ -37,10 +47,28 @@ def jeu():
     table_size = 5  # Par exemple, la taille de la table (peut être passée en paramètre)
     new_game = Game(player1_id=player1.id_player, player2_id=player2.id_player, table_size=table_size)
     db.session.add(new_game)
-    db.session.commit() 
+    db.session.commit()
 
     # Passer `id_game` à la vue pour l'utiliser dans le frontend
     return render_template('game.html', game_id=new_game.id_game, grid_state = new_game.boxes )
+
+'''
+    La fonction "travel_request" est responsable de traiter une requête de déplacement envoyée par le joueur humain ou l'IA,
+    et d'effectuer le mouvement approprié en mettant à jour l'état du jeu, en validant le mouvement, et en passant à l'IA si nécessaire.
+
+    Paramètres :
+    - Aucune donnée directe, mais la requête POST doit contenir les données suivantes dans le format JSON :
+        - current_x : le déplacement horizontal demandé par le joueur humain
+        - current_y : le déplacement vertical demandé par le joueur humain
+        - game_id : l'ID du jeu actuel pour récupérer l'état du jeu depuis la base de données.
+
+    Résultat :
+    - Retourne un JSON contenant :
+        - new_grid : la grille mise à jour après les mouvements du joueur humain et de l'IA
+        - new_current_player_x, new_current_player_y : les nouvelles positions du joueur courant
+        - other_x, other_y : les anciennes positions du joueur précédent
+        - winner : le gagnant actuel ou une valeur indiquant l'état de la partie.
+    '''
 
 @app.route('/travel_request', methods=['POST'])
 def travel_request():
@@ -74,7 +102,6 @@ def travel_request():
     result_IA = -1 
     while result_IA == -1 and current_player == player2_id:
         movement = get_move()
-        time.sleep(0.5)
         
         player_symbol_IA = "2"
         player_x_IA = current_game.playerpos2_x
@@ -86,7 +113,10 @@ def travel_request():
 
     new_x_IA, new_y_IA, array_string_IA = result_IA
     new_player_x, new_player_y, last_player_x,last_player_y = current_game.apply_movement(new_x_IA,new_y_IA,array_string_IA)
+    checkBoard()
+    array_string_IA = current_game.boxes
     winner = check_winner(array_string_IA)
-
-
     return jsonify({"new_grid" : array_string_IA, "new_current_player_x" : new_player_x, "new_current_player_y" : new_player_y, "other_x": last_player_x, "other_y": last_player_y, "winner" : winner })
+
+
+
