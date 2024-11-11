@@ -77,17 +77,6 @@ def check_winner(grid_string):
         return 3  # Égalité ou aucun gagnant déterminé (optionnel)
 
 '''
-La fonction checkBoard ne prend pas de paramètres :
-
-- Aucun paramètre direct n'est passé, car elle récupère les données de la requête HTTP via request.json.
-- La fonction utilise game_id pour récupérer l'état actuel du jeu et la grille associée dans la base de données.
-
-La fonction analyse la grille du jeu, effectue une exploration en largeur (BFS) pour vérifier si des régions sont complètement encerclées par un joueur. Si une région est encerclée, elle est remplie avec le symbole du joueur qui a entouré cette région. La grille mise à jour est ensuite enregistrée dans la base de données.
-
-Résultat :
-- Aucun résultat renvoyé directement, la grille du jeu est mise à jour dans la base de données.
-'''
-'''
 La fonction bfs prend en paramètre :
 
 - r : La ligne de départ pour l'exploration (coordonnée x).
@@ -97,6 +86,48 @@ La fonction implémente une recherche en largeur (BFS) pour explorer les cases e
 
 Résultat :
 - Aucun retour explicite, mais la grille est mise à jour si une région encerclée est trouvée, en remplaçant les cases "x" par le symbole du joueur qui a entouré la région.
+'''
+def bfs(r, c, rows, cols, board):
+    queue = deque([(r, c)])
+    visited = set([(r, c)])
+    enclosing_players = set()
+    enclosed_region = [(r, c)]
+    is_enclosed = True
+
+    while queue:
+        x, y = queue.popleft()
+
+        for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+            nx, ny = x + dx, y + dy
+
+            if nx < 0 or nx >= rows or ny < 0 or ny >= cols:
+                is_enclosed = True
+                continue
+
+            cell = board[nx][ny]
+            if cell == 'x' and (nx, ny) not in visited:
+                visited.add((nx, ny))
+                queue.append((nx, ny))
+                enclosed_region.append((nx, ny))
+            elif cell in {'1', '2'}:
+                enclosing_players.add(cell)
+
+    if is_enclosed and len(enclosing_players) == 1:
+        enclosing_player = enclosing_players.pop()
+
+        for x, y in enclosed_region:
+            board[x][y] = enclosing_player
+
+'''
+La fonction checkBoard ne prend pas de paramètres :
+
+- Aucun paramètre direct n'est passé, car elle récupère les données de la requête HTTP via request.json.
+- La fonction utilise game_id pour récupérer l'état actuel du jeu et la grille associée dans la base de données.
+
+La fonction analyse la grille du jeu, effectue une exploration en largeur (BFS) pour vérifier si des régions sont complètement encerclées par un joueur. Si une région est encerclée, elle est remplie avec le symbole du joueur qui a entouré cette région. La grille mise à jour est ensuite enregistrée dans la base de données.
+
+Résultat :
+- Aucun résultat renvoyé directement, la grille du jeu est mise à jour dans la base de données.
 '''
 def checkBoard():
     data = request.json
@@ -108,41 +139,11 @@ def checkBoard():
     board = [list(row) for row in grid.split()]
     rows, cols = len(board), len(board[0])
 
-    def bfs(r, c):
-        queue = deque([(r, c)])
-        visited = set([(r, c)])
-        enclosing_players = set()
-        enclosed_region = [(r, c)]
-        is_enclosed = True
-
-        while queue:
-            x, y = queue.popleft()
-
-            for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
-                nx, ny = x + dx, y + dy
-
-                if nx < 0 or nx >= rows or ny < 0 or ny >= cols:
-                    is_enclosed = True
-                    continue
-
-                cell = board[nx][ny]
-                if cell == 'x' and (nx, ny) not in visited:
-                    visited.add((nx, ny))
-                    queue.append((nx, ny))
-                    enclosed_region.append((nx, ny))
-                elif cell in {'1', '2'}:
-                    enclosing_players.add(cell)
-
-        if is_enclosed and len(enclosing_players) == 1:
-            enclosing_player = enclosing_players.pop()
-
-            for x, y in enclosed_region:
-                board[x][y] = enclosing_player
 
     for i in range(rows):
         for j in range(cols):
             if board[i][j] == 'x':
-                bfs(i, j)
+                bfs(i, j, rows, cols, board)
 
     updated_grid = ' '.join([''.join(row) for row in board])
     current_game.boxes = updated_grid
