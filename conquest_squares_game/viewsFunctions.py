@@ -76,47 +76,38 @@ def check_winner(grid_string):
     else:
         return 3  # Égalité ou aucun gagnant déterminé (optionnel)
 
-'''
-La fonction bfs prend en paramètre :
 
-- r : La ligne de départ pour l'exploration (coordonnée x).
-- c : La colonne de départ pour l'exploration (coordonnée y).
-
-La fonction implémente une recherche en largeur (BFS) pour explorer les cases environnantes à partir de la case (r, c) sur la grille. Elle est utilisée pour identifier les régions entourées par des obstacles ("x") ou des joueurs ("1" ou "2") et pour marquer les régions qui sont complètement encerclées par un seul joueur. Si une région est complètement entourée par un joueur et sans limite (bordure de la grille), la fonction met à jour les cellules "x" encerclées pour les remplir avec le symbole du joueur qui a entouré cette région.
-
-Résultat :
-- Aucun retour explicite, mais la grille est mise à jour si une région encerclée est trouvée, en remplaçant les cases "x" par le symbole du joueur qui a entouré la région.
-'''
-def bfs(r, c, rows, cols, board):
-    queue = deque([(r, c)])
-    visited = set([(r, c)])
+def bfs(initial_x, initial_y, totalRows, totalColumns, board):
+    
+    cell_to_explore = deque([(initial_x, initial_y)])
+    visited_cell = set([(initial_x, initial_y)])
     enclosing_players = set()
-    enclosed_region = [(r, c)]
+    enclosed_region = [(initial_x, initial_y)]
     is_enclosed = True
 
-    while queue:
-        x, y = queue.popleft()
+    while cell_to_explore:
+        current_x, current_y = cell_to_explore.popleft()
 
-        for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
-            nx, ny = x + dx, y + dy
+        for x_alteration, y_alteration in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+            new_x, new_y = current_x + x_alteration, current_y + y_alteration
 
-            if nx < 0 or nx >= rows or ny < 0 or ny >= cols:
+            if new_x < 0 or new_x >= totalRows or new_y < 0 or new_y >= totalColumns:
                 is_enclosed = True
                 continue
 
-            cell = board[nx][ny]
-            if cell == 'x' and (nx, ny) not in visited:
-                visited.add((nx, ny))
-                queue.append((nx, ny))
-                enclosed_region.append((nx, ny))
+            cell = board[new_x][new_y]
+            if cell == 'x' and (new_x, new_y) not in visited_cell:
+                visited_cell.add((new_x, new_y))
+                cell_to_explore.append((new_x, new_y))
+                enclosed_region.append((new_x, new_y))
             elif cell in {'1', '2'}:
                 enclosing_players.add(cell)
 
     if is_enclosed and len(enclosing_players) == 1:
         enclosing_player = enclosing_players.pop()
 
-        for x, y in enclosed_region:
-            board[x][y] = enclosing_player
+        for current_x, current_y in enclosed_region:
+            board[current_x][current_y] = enclosing_player
 
 '''
 La fonction checkBoard ne prend pas de paramètres :
