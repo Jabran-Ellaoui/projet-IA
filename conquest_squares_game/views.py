@@ -109,7 +109,7 @@ def travel_request():
 
     result_IA = -1 
     while result_IA == -1 and current_player == player2_id:
-        movement = get_move()
+        movement = get_move(game_id)
         
         player_symbol_IA = "2"
         player_x_IA = current_game.playerpos2_x
