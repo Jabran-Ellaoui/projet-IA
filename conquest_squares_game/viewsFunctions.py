@@ -7,20 +7,27 @@ from collections import deque
 
 
 #Description des paramètres
-'''
-La fonction is_valid_movement prend en paramètre :
-
-- movement : Dictionnaire indiquant le déplacement du joueur ({"x": ..., "y": ...}), où "x" et "y" représentent le décalage horizontal et vertical respectivement. Par exemple, {"x": 1, "y": 0} pour un pas à droite.
-- array_string : Chaîne représentant l’état actuel de la grille, où chaque ligne est séparée par un espace. Les cases sont codées par des caractères (ex : '0' pour une case vide, 'x' pour un obstacle, ou un chiffre pour le symbole d'un joueur).
-- player : Dictionnaire indiquant la position actuelle et le symbole du joueur ({"x": ..., "y": ..., "symbol": ...}).
-
-La fonction vérifie si le mouvement du joueur est valide sur la grille, en s'assurant que le déplacement est dans les limites de la grille et qu'il n'y a pas d'obstacle ("x") ou que la case n'est pas déjà occupée par un autre joueur. Si le mouvement est valide, elle met à jour la grille et retourne la nouvelle position du joueur ainsi que la grille mise à jour. Sinon, elle retourne -1.
-
-Résultat : 
-- Si le mouvement est valide, la fonction retourne une tuple (nouvelle position x, nouvelle position y, nouvelle grille).
-- Si le mouvement est invalide, elle retourne -1.
-'''
 def is_valid_movement(movement, array_string, player):
+    '''
+    La fonction is_valid_movement prend en paramètre :
+
+    - movement : Dictionnaire indiquant le déplacement du joueur ({"x": ..., "y": ...}), 
+    où "x" et "y" représentent le décalage horizontal et vertical respectivement. 
+    Par exemple, {"x": 1, "y": 0} pour un déplacement à droite.
+    - array_string : Chaîne représentant l’état actuel de la grille, où chaque ligne est séparée par un espace.
+    Les cases sont codées par des caractères (ex :'x' pour une case libre, ou un chiffre pour le symbole d'un joueur).
+    - player : Dictionnaire indiquant la position actuelle et le symbole du joueur ({"x": ..., "y": ..., "symbol": ...}).
+
+    La fonction vérifie si le mouvement du joueur est valide sur la grille,
+    en s'assurant que le déplacement est dans les limites de la grille 
+    et que la case n'est pas déjà occupée par un autre joueur. Si le mouvement est valide, 
+    elle met à jour la grille et retourne la nouvelle position du joueur ainsi que la grille mise à jour.
+    Sinon, elle retourne -1.
+
+    Résultat : 
+    - Si le mouvement est valide, la fonction retourne une tuple (nouvelle position x, nouvelle position y, nouvelle grille).
+    - Si le mouvement est invalide, elle retourne -1.
+    '''
     # Convertit array_string en une grille de caractères
     lines = array_string.strip().split(' ')
     grid = [list(line) for line in lines]
@@ -46,20 +53,23 @@ def is_valid_movement(movement, array_string, player):
         return -1
     
 
-'''
-La fonction check_winner prend en paramètre :
 
-- grid_string : une chaîne de caractères représentant l'état actuel de la grille, où chaque case est un caractère ("x" pour un obstacle, "1" pour le joueur 1, "2" pour le joueur 2).
-
-La fonction vérifie d'abord si des obstacles ("x") sont encore présents dans la grille. Si c'est le cas, le jeu n'est pas encore terminé. Sinon, elle compte les occurrences des symboles "1" (joueur humain) et "2" (IA) pour déterminer qui a gagné ou s'il y a égalité.
-
-Résultat :
-- 0 si le jeu n'est pas encore terminé (présence d'obstacles).
-- 1 si le joueur humain ("1") a plus de symboles que l'IA.
-- 2 si l'IA ("2") a plus de symboles que le joueur humain.
-- 3 si c'est une égalité ou qu'aucun gagnant n'est déterminé.
-'''
 def check_winner(grid_string):
+    '''
+    La fonction check_winner prend en paramètre :
+
+    - grid_string : une chaîne de caractères représentant l'état actuel de la grille,
+    où chaque case est un caractère ("x" pour un case libre, "1" pour le joueur 1, "2" pour le joueur 2).
+
+    La fonction vérifie d'abord si des cases libres ("x") sont encore présents dans la grille. Si c'est le cas,
+    le jeu n'est pas encore terminé. Sinon, elle compte les occurrences des symboles "1" (joueur humain) et "2" (IA) pour déterminer qui a gagné ou s'il y a égalité.
+
+    Résultat :
+    - 0 si le jeu n'est pas encore terminé (présence de case libre).
+    - 1 si le joueur humain ("1") a plus de symboles que l'IA.
+    - 2 si l'IA ("2") a plus de symboles que le joueur humain.
+    - 3 si c'est une égalité.
+    '''
     # Vérifie s'il reste des "x" dans la grille
     if "x" in grid_string:
          return 0  # Le jeu n'est pas encore terminé
@@ -78,7 +88,28 @@ def check_winner(grid_string):
 
 
 def bfs(initial_x, initial_y, totalRows, totalColumns, board):
+    """
+    Explore une région contiguë sur un tableau en effectuant une recherche en largeur (BFS) 
+    pour identifier une zone potentiellement "enfermée" par un joueur.
+
+    Cette fonction vérifie si une région définie par des cellules adjacentes marquées 'x' 
+    est entièrement entourée par des bordures ou des cellules appartenant à un joueur ('1' ou '2').
+    Si une région est complètement enfermée par un joueur unique, elle est "capturée" et ses 
+    cellules sont marquées par le symbole de ce joueur dans le tableau.
+
+    Parameters:
+        initial_x (int): Coordonnée de ligne de départ pour l'exploration.
+        initial_y (int): Coordonnée de colonne de départ pour l'exploration.
+        totalRows (int): Nombre total de lignes dans le tableau.
+        totalColumns (int): Nombre total de colonnes dans le tableau.
+        board (list[list[str]]): Tableau représentant la grille de jeu. Les cellules peuvent contenir :
+            - 'x' : une cellule non capturée.
+            - '1', '2' : une cellule appartenant au joueur 1 ou 2.
     
+    Returns:
+        None: Modifie directement le tableau `board` si une région est capturée.
+        
+    """
     cell_to_explore = deque([(initial_x, initial_y)])
     visited_cell = set([(initial_x, initial_y)])
     enclosing_players = set()
@@ -109,18 +140,20 @@ def bfs(initial_x, initial_y, totalRows, totalColumns, board):
         for current_x, current_y in enclosed_region:
             board[current_x][current_y] = enclosing_player
 
-'''
-La fonction checkBoard ne prend pas de paramètres :
 
-- Aucun paramètre direct n'est passé, car elle récupère les données de la requête HTTP via request.json.
-- La fonction utilise game_id pour récupérer l'état actuel du jeu et la grille associée dans la base de données.
-
-La fonction analyse la grille du jeu, effectue une exploration en largeur (BFS) pour vérifier si des régions sont complètement encerclées par un joueur. Si une région est encerclée, elle est remplie avec le symbole du joueur qui a entouré cette région. La grille mise à jour est ensuite enregistrée dans la base de données.
-
-Résultat :
-- Aucun résultat renvoyé directement, la grille du jeu est mise à jour dans la base de données.
-'''
 def checkBoard():
+    '''
+    La fonction checkBoard ne prend pas de paramètres :
+
+    - Aucun paramètre direct n'est passé, car elle récupère les données de la requête HTTP via request.json.
+    - La fonction utilise game_id pour récupérer l'état actuel du jeu et la grille associée dans la base de données.
+
+    La fonction analyse la grille du jeu, effectue une exploration en largeur (BFS) pour vérifier si des régions sont complètement encerclées par un joueur.
+    Si une région est encerclée, elle est remplie avec le symbole du joueur qui a entouré cette région. La grille mise à jour est ensuite enregistrée dans la base de données.
+
+    Résultat :
+    - Aucun résultat renvoyé directement, la grille du jeu est mise à jour dans la base de données.
+    '''
     data = request.json
     game_id = data.get("game_id")
     current_game = Game.query.get(game_id)

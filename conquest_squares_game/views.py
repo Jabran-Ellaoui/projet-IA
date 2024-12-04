@@ -17,7 +17,9 @@ def index():
 def content(content_id):
     return content_id
 
-'''
+@app.route('/game')
+def jeu():
+    '''
     La fonction "jeu" est responsable de la gestion de la page du jeu, incluant la création des joueurs,
     la création d'une nouvelle instance de jeu et l'envoi des informations pertinentes à la vue.
 
@@ -27,8 +29,6 @@ def content(content_id):
     Résultat :
     - Rendu de la vue "game.html" avec les informations du jeu, notamment l'ID du jeu et l'état initial de la grille (grid_state).
     '''
-@app.route('/game')
-def jeu():
     player1 = Player.query.filter_by(name="Player 1").first()
     player2 = Player.query.filter_by(name="Player IA").first()
 
@@ -52,7 +52,11 @@ def jeu():
     # Passer `id_game` à la vue pour l'utiliser dans le frontend
     return render_template('game.html', game_id=new_game.id_game, grid_state = new_game.boxes )
 
-'''
+
+
+@app.route('/travel_request', methods=['POST'])
+def travel_request():
+    '''
     La fonction "travel_request" est responsable de traiter une requête de déplacement envoyée par le joueur humain ou l'IA,
     et d'effectuer le mouvement approprié en mettant à jour l'état du jeu, en validant le mouvement, et en passant à l'IA si nécessaire.
 
@@ -69,9 +73,6 @@ def jeu():
         - other_x, other_y : les anciennes positions du joueur précédent
         - winner : le gagnant actuel ou une valeur indiquant l'état de la partie.
     '''
-
-@app.route('/travel_request', methods=['POST'])
-def travel_request():
     # partie pour prendre en compte le mouvement du joueur humain
     data = request.json # récupére les données du client 
     movement_x = data.get("current_x")

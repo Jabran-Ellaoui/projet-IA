@@ -45,16 +45,18 @@ class Game(db.Model):
                 "x" * (table_size - 1) + "2"
         ])
 
-    '''
-    La fonction apply_movement prend trois paramètres :
-
-    player_new_x et player_new_y : les nouvelles coordonnées du joueur qui effectue le mouvement.
-    new_boxes : la nouvelle configuration de la grille après le mouvement.
-    La fonction vérifie quel joueur est le joueur actuel (current_player) et met à jour les coordonnées du joueur correspondant . Ensuite, elle passe le tour à l’autre joueur. La grille (boxes) est également mise à jour, et les changements sont sauvegardés en base de données.
-
-    La fonction retourne la position actuelle des deux joueurs, en mettant la position du joueur actuel en premier.
-    '''
     def apply_movement(self, player_new_x, player_new_y, new_boxes):
+        '''
+        La fonction apply_movement prend trois paramètres :
+
+        player_new_x et player_new_y : les nouvelles coordonnées du joueur qui effectue le mouvement.
+        new_boxes : la nouvelle configuration de la grille après le mouvement.
+        La fonction vérifie quel joueur est le joueur actuel (current_player) et met à jour les coordonnées
+        du joueur correspondant . Ensuite, elle passe le tour à l’autre joueur. La grille (boxes) est également
+        mise à jour, et les changements sont sauvegardés en base de données.
+
+        La fonction retourne la position actuelle des deux joueurs, en mettant la position du joueur actuel en premier.
+        '''
         if(self.player1_id == self.current_player):
             self.playerpos1_x = player_new_x
             self.playerpos1_y = player_new_y           
