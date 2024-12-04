@@ -68,7 +68,22 @@ class Game(db.Model):
         db.session.commit() 
         return (self.playerpos1_x, self.playerpos1_y, self.playerpos2_x, self.playerpos2_y) if self.current_player == self.player1_id else (self.playerpos2_x, self.playerpos2_y, self.playerpos1_x, self.playerpos1_y)
 
+class QTable(db.Model):
+    __tablename__ = 'q_table'
 
+    id_q_table = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    state_board = db.Column(db.String(255), nullable=False, unique=True)  # L'état du tableau, représenté sous forme de chaîne
+    esperance_droit = db.Column(db.Float, nullable=False, default=0.0)
+    esperance_gauche = db.Column(db.Float, nullable=False, default=0.0)
+    esperance_haut = db.Column(db.Float, nullable=False, default=0.0)
+    esperance_bas = db.Column(db.Float, nullable=False, default=0.0)
+
+    def __init__(self, state_board, esperance_droit=0.0, esperance_gauche=0.0, esperance_haut=0.0, esperance_bas=0.0):
+        self.state_board = state_board
+        self.esperance_droit = esperance_droit
+        self.esperance_gauche = esperance_gauche
+        self.esperance_haut = esperance_haut
+        self.esperance_bas = esperance_bas
 def init_db():
     db.drop_all()
     db.create_all()

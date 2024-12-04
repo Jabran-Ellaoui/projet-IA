@@ -88,7 +88,14 @@ def travel_request():
     player_y = current_game.playerpos1_y 
     array_string = current_game.boxes
     # résultat du tableau par rapport au mouvement de l'humain
-    result_human = is_valid_movement({"x": movement_x, "y": movement_y},array_string,{"x": player_x, "y":player_y, "symbol": player_symbol})
+    movement_position = {"x": movement_x, "y": movement_y}
+    player_data = {
+        "x": player_x,
+        "y": player_y,
+        "symbol": player_symbol
+    }
+
+    result_human = is_valid_movement(movement_position, array_string, player_data)
 
     if result_human == - 1 :
         return "-1"
@@ -107,7 +114,14 @@ def travel_request():
         player_x_IA = current_game.playerpos2_x
         player_y_IA = current_game.playerpos2_y
 
-        result_IA = is_valid_movement({"x": movement["x"], "y": movement["y"]},array_string_human, {"x": player_x_IA, "y":player_y_IA, "symbol": player_symbol_IA})
+        movement_position_IA = {"x": movement["x"], "y": movement["y"]}
+        player_data_IA = {
+            "x": player_x_IA,
+            "y": player_y_IA,
+            "symbol": player_symbol_IA
+        }
+        result_IA = is_valid_movement(movement_position_IA, array_string_human, player_data_IA)
+
     current_player = player1_id
     db.session.commit() 
 
