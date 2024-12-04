@@ -127,9 +127,7 @@
             if (result != "-1") {
                 generateGrid(result.new_grid,result.new_current_player_x,result.new_current_player_y, result.other_x, result.other_y);  // Met à jour la grille avec la nouvelle position
                 updateTurnMessage(result.winner)
-            } else {
-                alert(result.error || "Mouvement non valide.");
-            }
+            } 
         });
 
         // Initialiser la grille
