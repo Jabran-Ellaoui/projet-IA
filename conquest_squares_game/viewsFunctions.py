@@ -1,6 +1,13 @@
 from flask import Flask, render_template, request, jsonify 
 from .models import db, Player, Game
+<<<<<<< Updated upstream
 from .ai import get_move
+=======
+from collections import deque
+
+
+
+>>>>>>> Stashed changes
 
 #Description des paramètres
 '''
