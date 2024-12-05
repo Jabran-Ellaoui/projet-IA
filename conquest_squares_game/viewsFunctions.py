@@ -31,16 +31,21 @@ def is_valid_movement(movement, array_string, player):
     lines = array_string.strip().split(' ')
     grid = [list(line) for line in lines]
     n = len(grid)  # Dimension de la grille
+
     # Calcule la nouvelle position
-    
     new_x = player["x"] + movement["x"]
     new_y = player["y"] + movement["y"]
-    # Vérifie les limites de la grille et la présence d'un obstacle
-    if not (0 <= new_x < n and 0 <= new_y < n):
+
+    # Vérifie les limites de la grille
+    if not (0 <= new_x < len(grid[0]) and 0 <= new_y < len(grid)):
+        print(f"Le mouvement {movement} est en dehors des limites: new_x={new_x}, new_y={new_y}")
         return -1  # Mouvement non autorisé
-    
-    if grid[new_y][new_x] == 'x' or int(grid[new_y][new_x]) == int( player["symbol"]):
-        
+
+    # Vérifie si la case cible est occupée
+    target_cell = grid[new_y][new_x]
+    print(f"Cellule ciblée : {movement}: {target_cell}")
+
+    if target_cell == 'x' or int(target_cell) == int(player["symbol"]):
         # Mouvement autorisé, mise à jour de la grille
         grid[new_y][new_x] = player["symbol"]  # La nouvelle position prend le symbole du joueur
         
@@ -48,9 +53,9 @@ def is_valid_movement(movement, array_string, player):
         modified_array_string = ' '.join(''.join(row) for row in grid)
         # Retourne la nouvelle position et la grille mise à jour
         return new_x, new_y, modified_array_string
-    else :
+    else:
+        print(f"Le mouvement {movement} est invalide: la cellule est occupée par {target_cell}")
         return -1
-    
 
 
 def check_winner(grid_string):
