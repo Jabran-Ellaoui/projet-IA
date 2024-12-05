@@ -86,6 +86,20 @@ class QTable(db.Model):
         self.esperance_gauche = esperance_gauche
         self.esperance_haut = esperance_haut
         self.esperance_bas = esperance_bas
+class History(db.Model):
+    __tablename__ = 'history'
+
+    id_history = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id_game = db.Column(db.Integer, db.ForeignKey('game.id_game'), nullable=False)
+    precedent_state_board = db.Column(db.String(255), nullable=False)  # Previous board state as a string
+    id_player = db.Column(db.Integer, db.ForeignKey('player.id_player'), nullable=False)  # Player making the move
+    precedent_move = db.Column(db.String(50), nullable=False)  # Previous move represented as a stringified tuple (e.g., "(x, y)")
+
+    def __init__(self, id_game, precedent_state_board, id_player, precedent_move):
+        self.id_game = id_game
+        self.precedent_state_board = precedent_state_board
+        self.id_player = id_player
+        self.precedent_move = precedent_move
 def init_db():
     db.drop_all()
     db.create_all()
