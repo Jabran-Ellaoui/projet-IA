@@ -73,12 +73,11 @@ class Game(db.Model):
 class QTable(db.Model):
     __tablename__ = 'q_table'
 
-    id_q_table = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    state_board = db.Column(db.String(255), nullable=False, unique=True)  # L'état du tableau, représenté sous forme de chaîne
-    esperance_droit = db.Column(db.Float, nullable=True, default=0.0)
-    esperance_gauche = db.Column(db.Float, nullable=True, default=0.0)
-    esperance_haut = db.Column(db.Float, nullable=True, default=0.0)
-    esperance_bas = db.Column(db.Float, nullable=True, default=0.0)
+    state_board = db.Column(db.String(255), primary_key=True)  # L'état du tableau, représenté sous forme de chaîne
+    esperance_up = db.Column(db.Float, nullable=True, default=0.0)
+    esperance_left = db.Column(db.Float, nullable=True, default=0.0)
+    esperance_right = db.Column(db.Float, nullable=True, default=0.0)
+    esperance_down = db.Column(db.Float, nullable=True, default=0.0)
 
     def __init__(self, state_board, esperance_droit=0.0, esperance_gauche=0.0, esperance_haut=0.0, esperance_bas=0.0):
         self.state_board = state_board
@@ -90,12 +89,11 @@ class QTable(db.Model):
 class History(db.Model):
     __tablename__ = 'history'
 
-    id_history = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    id_game = db.Column(db.Integer, db.ForeignKey('game.id_game'), nullable=False)
-    precedent_state_board = db.Column(db.String(255), nullable=False)  # Previous board state as a string
-    id_player = db.Column(db.Integer, db.ForeignKey('player.id_player'), nullable=False)  # Player making the move
-    precedent_move = db.Column(db.String(50), nullable=False)  # Previous move represented as a stringified tuple (e.g., "(x, y)")
-
+    id_game = db.Column(db.Integer, primary_key=True )
+    id_player = db.Column(db.Integer, primary_key=True)  # Player making the move
+    precedent_state_board = db.Column(db.String(255), nullable=False)  # Previous board state as a string    
+    precedent_move = db.Column(db.String(20), nullable=False)  # Previous move represented as a stringified tuple (e.g., "(x, y)")
+    
     def __init__(self, id_game, precedent_state_board, id_player, precedent_move):
         self.id_game = id_game
         self.precedent_state_board = precedent_state_board

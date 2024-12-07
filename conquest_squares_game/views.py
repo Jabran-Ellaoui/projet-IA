@@ -110,7 +110,7 @@ def travel_request():
     possibles_moves = valides_possibles_moves(array_string_human, {"x" : last_player_x, "y" : last_player_y, "symbol" : "2"})
     # après avoir choisies le mouvement, l'ia apliquer les changements a la base de donnees, elle renvoie le resultat pour l'affichage 
     chosen_move = get_move(current_game, possibles_moves)
-    print("choise move :",chosen_move)
+    #print("choise move :",chosen_move)
     result_IA = is_valid_movement(chosen_move, array_string_human, {"x": last_player_x,"y": last_player_y, "symbol" : "2"})
 
     current_player = player1_id #todo  : utile ? 

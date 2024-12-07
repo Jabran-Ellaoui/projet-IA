@@ -38,12 +38,12 @@ def is_valid_movement(movement, array_string, player):
 
     # Vérifie les limites de la grille
     if not (0 <= new_x < len(grid[0]) and 0 <= new_y < len(grid)):
-        print(f"Le mouvement {movement} est en dehors des limites: new_x={new_x}, new_y={new_y}")
+        #print(f"Le mouvement {movement} est en dehors des limites: new_x={new_x}, new_y={new_y}")
         return -1  # Mouvement non autorisé
 
     # Vérifie si la case cible est occupée
     target_cell = grid[new_y][new_x]
-    print(f"Cellule ciblée : {movement}: {target_cell}")
+    #print(f"Cellule ciblée : {movement}: {target_cell}")
 
     if target_cell == 'x' or int(target_cell) == int(player["symbol"]):
         # Mouvement autorisé, mise à jour de la grille
@@ -54,7 +54,7 @@ def is_valid_movement(movement, array_string, player):
         # Retourne la nouvelle position et la grille mise à jour
         return new_x, new_y, modified_array_string
     else:
-        print(f"Le mouvement {movement} est invalide: la cellule est occupée par {target_cell}")
+        #print(f"Le mouvement {movement} est invalide: la cellule est occupée par {target_cell}")
         return -1
     
 
@@ -66,7 +66,7 @@ def valides_possibles_moves(array_string, player) :
     the second one has 2 attributs, x and y which describe the move
     """
     valid_moves_and_cons = []
-    possibles_moves = [{"x": 0, "y" : 1},{"x": 1, "y" : 0},{"x": 0, "y" : -1},{"x": -1, "y" : 0}]
+    possibles_moves = [{"x": 0, "y" : -1},{"x": 1, "y" : 0},{"x": 0, "y" : 1},{"x": -1, "y" : 0}]
     
     for tested_move in possibles_moves :
         result_move = is_valid_movement(tested_move, array_string, player)

@@ -4,7 +4,7 @@ from .models import QTable, Game
 from .viewsFunctions import is_valid_movement,checkBoard
 # return acceptable move chose by ai (random) (possibility : (0,1) : up, (1,0) : right, (0,-1) : down, (-1,0): left), without change data in the data base
 import random
-from .models import QTable, Game, db
+from .models import QTable, Game, History, db
 
 def encode_state_board(boxes, player1_x, player1_y, player2_x, player2_y):
     """
@@ -38,10 +38,10 @@ def calculate_cell_capture_reward(previous_boxes, new_boxes, ai_symbol="2"):
     reward = new_ai_cells - previous_ai_cells
 
     # Add a small penalty if no cells were captured
-    print(new_boxes)
-    print("new ai cells", new_ai_cells)
-    print("previous ai cells", previous_ai_cells)
-    print("Reward : ", reward)
+    #print(new_boxes)
+    #print("new ai cells", new_ai_cells)
+    #print("previous ai cells", previous_ai_cells)
+    #print("Reward : ", reward)
     return reward if reward > 0 else -1
 
 def reset_esperance (qTable_instance, possibles_moves) : 
@@ -76,19 +76,19 @@ def exploration (valides_possibles_moves):
     filtered_moves = [move for move in valides_possibles_moves if move is not None]
     return random.choice(filtered_moves)
 
-def exploitation(q_entry, current_game, valides_possibles_moves):
+def exploitation(q_entry, valides_possibles_moves):
     esperances_moves = [
         (q_entry.esperance_haut, valides_possibles_moves[0]),
         (q_entry.esperance_droit, valides_possibles_moves[1]),
         (q_entry.esperance_bas, valides_possibles_moves[2]),
         (q_entry.esperance_gauche, valides_possibles_moves[3])
     ]
-    print(esperances_moves)
+    #print(esperances_moves)
     valid_esperances_moves = [(esperance, move) for esperance, move in esperances_moves if esperance is not None and move is not None]
 
     max_esperance, best_move = max(valid_esperances_moves, key=lambda x: x[0])
 
-    print("fin exploitation : ", best_move)
+    #print("fin exploitation : ", best_move)
 
     return best_move
 
@@ -133,14 +133,13 @@ def fonction_a_eliminer (current_game, result, move, q_entry, alpha = 0.9, gamma
         setattr(q_entry, action_map[action], updated_q_value)
 
     db.session.commit()
-    print(f"Updated Q-value for action {move}: {updated_q_value}")
+    #print(f"Updated Q-value for action {move}: {updated_q_value}")
 
-    print("Espe droitre", q_entry.esperance_droit)
-    print("Espe gauche", q_entry.esperance_gauche)
-    print("Espe bas", q_entry.esperance_bas)
-    print("Espe haut", q_entry.esperance_haut)
+    #print("Espe droitre", q_entry.esperance_droit)
+    #print("Espe gauche", q_entry.esperance_gauche)
+    #print("Espe bas", q_entry.esperance_bas)
+    #print("Espe haut", q_entry.esperance_haut)
     return move
-
 
 
 # en fait je pense que cette fonction ne fait que renvoie un mouvement pas besoin de plus d'élément, il seront ajouté plus loin. 
@@ -151,7 +150,7 @@ def get_move(current_game, valides_possibles_moves, epsilon=0.1, alpha=0.2, gamm
     - Alpha: Learning rate.
     - Gamma: Discount factor.
     """
-   
+    print("mouvement possibles (debut get_move) : ",valides_possibles_moves)
     # crée ID de l'instance possible de QTable, a partir du plateau actuelle 
     state_board = encode_state_board(
         current_game.boxes,
@@ -161,7 +160,7 @@ def get_move(current_game, valides_possibles_moves, epsilon=0.1, alpha=0.2, gamm
         current_game.playerpos2_y
     )
 
-    print("Current State Board:", state_board)
+    #print("Current State Board:", state_board)
     # cree ou recupere une instance de qtable selon sont existance par rapport a un etat donnee d'un plateau 
     q_entry = instance_QTable(state_board, valides_possibles_moves)
     
@@ -171,11 +170,69 @@ def get_move(current_game, valides_possibles_moves, epsilon=0.1, alpha=0.2, gamm
         chosen_move = exploration(valides_possibles_moves)
     else:
         # Exploitation: Choose the best move based on esperances of an instance of Q-values
-        chosen_move = exploitation(q_entry, current_game, valides_possibles_moves) 
+        chosen_move = exploitation(q_entry, valides_possibles_moves) 
         
-    #ici qu'on fait l'apprentissage 
-  
+    movement_tuple = (chosen_move["x"],chosen_move["y"])
+    match(movement_tuple):
+        case (0,-1):
+            string_move = "up"
+        case (1,0):
+            string_move = "right"
+        case (0,1):
+            string_move = "down"
+        case (-1,0):
+            string_move = "left" 
+
+    #print("le mouvement choisie : ", chosen_move)
+
+    learning_by_renforcing(current_game.current_player,current_game.game_id, state_board, string_move, epsilon, alpha, gamma )
+
     return chosen_move
+
+def learning_by_renforcing (player_id, game_id, current_qTable_instance, move, epsilon, alpha, gamma):
+    
+    game_history = History.query.get(game_id, player_id)
+    if not game_history :
+        game_history = History (
+            id_game = game_id,
+            id_player = player_id,
+            precedent_state_board =  current_qTable_instance.state_board,   
+            precedent_move = move
+        )
+        db.session.add(game_history)
+    else : 
+        reward = calculate_cell_capture_reward(game_history.precedent_state_board, current_qTable_instance.state_board, ai_symbol="2")
+
+        previous_move = game_history.precedent_move
+        previoux_instance_QTable = QTable.query.get(game_history.precedent_state_board)
+    
+        match(move):
+            case "up" :
+                esperance_current_move = current_qTable_instance.esperance_up
+            case "right" :
+                esperance_current_move = current_qTable_instance.esperance_right
+            case "down" :
+                esperance_current_move = current_qTable_instance.esperance_down
+            case "left" :
+                esperance_current_move = current_qTable_instance.esperance_left
+
+        match (previous_move) : 
+            case "up": 
+                previoux_instance_QTable.esperance_up = previoux_instance_QTable.esperance_up + alpha * (reward + gamma * esperance_current_move - previoux_instance_QTable.esperance_up)
+            case "right":
+                previoux_instance_QTable.esperance_right = previoux_instance_QTable.esperance_right + alpha * (reward + gamma * esperance_current_move - previoux_instance_QTable.esperance_right)
+            case "down":
+                previoux_instance_QTable.esperance_down = previoux_instance_QTable.esperance_down + alpha * (reward + gamma * esperance_current_move - previoux_instance_QTable.esperance_down)
+            case "left":
+                previoux_instance_QTable.esperance_left = previoux_instance_QTable.esperance_left + alpha * (reward + gamma * esperance_current_move - previoux_instance_QTable.esperance_left)
+    
+        game_history.precedent_state_board = current_qTable_instance.state_board
+        game_history.precedent_move = move
+    
+    db.session.commit()
+
+
+    
 
 
 
