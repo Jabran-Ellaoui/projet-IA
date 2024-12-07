@@ -61,9 +61,25 @@ def is_valid_movement(movement, array_string, player):
 # renvoie l'entierete des mmouvements valides pour l'ia sous la forme d'un tableau de 4 cellule (haut, droit, bas, gauche)
 def valides_possibles_moves(array_string, player) :
     """
-    return un item compost of 2 other item, the first avec 3 attributs, (new_x,new_y,string_array)
-    new_x and new_y is about the new position of the player, and string_array is about the new state of the board of game 
-    the second one has 2 attributs, x and y which describe the move
+    Retourne une liste de mouvements valides et leurs conséquences sur l'état du jeu.
+
+    Cette fonction teste les mouvements possibles pour un joueur en fonction de l'état actuel du plateau (array_string) et de la position du joueur.
+    Elle retourne une liste de mouvements valides où chaque mouvement est accompagné de deux éléments :
+    - Le premier élément contient trois attributs : 
+        - `new_x` : la nouvelle position horizontale du joueur après le mouvement.
+        - `new_y` : la nouvelle position verticale du joueur après le mouvement.
+        - `string_array` : le nouvel état du plateau après le mouvement.
+    - Le deuxième élément contient deux attributs : 
+        - `x` : la coordonnée horizontale du mouvement.
+        - `y` : la coordonnée verticale du mouvement.
+
+    Paramètres :
+    - array_string (str) : La représentation de l'état actuel du plateau sous forme de chaîne de caractères, où chaque case est représentée par un caractère.
+    - player (dict) : Un dictionnaire contenant les informations du joueur (comme les coordonnées de sa position actuelle et son symbole).
+
+    Retourne :
+    - list : Une liste de mouvements valides et leurs conséquences. Chaque élément est soit un dictionnaire avec les attributs `x`, `y`, 
+      soit `None` si le mouvement n'est pas valide. Les mouvements sont testés selon les coordonnées possibles : haut, droite, bas, gauche.
     """
     valid_moves_and_cons = []
     possibles_moves = [{"x": 0, "y" : -1},{"x": 1, "y" : 0},{"x": 0, "y" : 1},{"x": -1, "y" : 0}]
@@ -193,3 +209,9 @@ def checkBoard():
     updated_grid = ' '.join([''.join(row) for row in board])
     current_game.boxes = updated_grid
     db.session.commit()
+
+def get_player_id(current_game):
+    if (current_game.current_player == current_game.player1_id):
+        return 1
+    else:
+        return 2
