@@ -56,7 +56,24 @@ def is_valid_movement(movement, array_string, player):
     else:
         print(f"Le mouvement {movement} est invalide: la cellule est occupée par {target_cell}")
         return -1
+    
 
+# renvoie l'entierete des mmouvements valides pour l'ia sous la forme d'un tableau de 4 cellule (haut, droit, bas, gauche)
+def valides_possibles_moves(array_string, player) :
+    """
+    return un item compost of 2 other item, the first avec 3 attributs, (new_x,new_y,string_array)
+    new_x and new_y is about the new position of the player, and string_array is about the new state of the board of game 
+    the second one has 2 attributs, x and y which describe the move
+    """
+    valid_moves_and_cons = []
+    possibles_moves = [{"x": 0, "y" : 1},{"x": 1, "y" : 0},{"x": 0, "y" : -1},{"x": -1, "y" : 0}]
+    
+    for tested_move in possibles_moves :
+        result_move = is_valid_movement(tested_move, array_string, player)
+        valid_moves_and_cons.append(tested_move if result_move != -1 else None)       
+
+    return valid_moves_and_cons 
+    
 
 def check_winner(grid_string):
     '''

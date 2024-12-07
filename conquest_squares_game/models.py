@@ -38,7 +38,7 @@ class Game(db.Model):
         self.playerpos1_y = 0   
         self.playerpos2_x = table_size -1
         self.playerpos2_y = table_size -1
-        self.current_player= self.player1_id
+        self.current_player = self.player1_id
         self.boxes = self.boxes = "".join([
                 "1" + "x" * (table_size - 1),
                 " " + ("x" * table_size + " ") * (table_size - 2), 
@@ -75,10 +75,10 @@ class QTable(db.Model):
 
     id_q_table = db.Column(db.Integer, primary_key=True, autoincrement=True)
     state_board = db.Column(db.String(255), nullable=False, unique=True)  # L'état du tableau, représenté sous forme de chaîne
-    esperance_droit = db.Column(db.Float, nullable=False, default=0.0)
-    esperance_gauche = db.Column(db.Float, nullable=False, default=0.0)
-    esperance_haut = db.Column(db.Float, nullable=False, default=0.0)
-    esperance_bas = db.Column(db.Float, nullable=False, default=0.0)
+    esperance_droit = db.Column(db.Float, nullable=True, default=0.0)
+    esperance_gauche = db.Column(db.Float, nullable=True, default=0.0)
+    esperance_haut = db.Column(db.Float, nullable=True, default=0.0)
+    esperance_bas = db.Column(db.Float, nullable=True, default=0.0)
 
     def __init__(self, state_board, esperance_droit=0.0, esperance_gauche=0.0, esperance_haut=0.0, esperance_bas=0.0):
         self.state_board = state_board
@@ -86,6 +86,7 @@ class QTable(db.Model):
         self.esperance_gauche = esperance_gauche
         self.esperance_haut = esperance_haut
         self.esperance_bas = esperance_bas
+
 class History(db.Model):
     __tablename__ = 'history'
 
@@ -100,6 +101,7 @@ class History(db.Model):
         self.precedent_state_board = precedent_state_board
         self.id_player = id_player
         self.precedent_move = precedent_move
+
 def init_db():
     db.drop_all()
     db.create_all()

@@ -77,13 +77,12 @@ def travel_request():
     data = request.json # récupére les données du client 
     movement_x = data.get("current_x")
     movement_y = data.get("current_y")
-
     game_id = data.get("game_id")
+
     current_game = Game.query.get(game_id)
     player1_id = current_game.player1_id
     player2_id = current_game.player2_id
-    current_player= current_game.current_player
-
+    current_player = current_game.current_player
     player_symbol = "1" 
     player_x = current_game.playerpos1_x
     player_y = current_game.playerpos1_y 
@@ -103,33 +102,24 @@ def travel_request():
     if (current_player == player1_id):
         new_x_human, new_y_human, array_string_human = result_human
         # pour enregister les nouvelles positions, et position, et passé la main à l'IA
-        last_player_x,last_player_y, new_player_x, new_player_y = current_game.apply_movement(new_x_human,new_y_human,array_string_human)
+        last_player_x, last_player_y, new_player_x, new_player_y = current_game.apply_movement(new_x_human,new_y_human,array_string_human)
+        
         current_player = player2_id
         db.session.commit()
+    # changement appliquer : on donne a l'IA, les differents mouvements possibles, (todo : pour respecter les couches ?)
+    possibles_moves = valides_possibles_moves(array_string_human, {"x" : last_player_x, "y" : last_player_y, "symbol" : "2"})
+    # après avoir choisies le mouvement, l'ia apliquer les changements a la base de donnees, elle renvoie le resultat pour l'affichage 
+    chosen_move = get_move(current_game, possibles_moves)
+    print("choise move :",chosen_move)
+    result_IA = is_valid_movement(chosen_move, array_string_human, {"x": last_player_x,"y": last_player_y, "symbol" : "2"})
 
-    result_IA = -1 
-    while result_IA == -1 and current_player == player2_id:
-        movement = get_move(game_id)
-        
-        player_symbol_IA = "2"
-        player_x_IA = current_game.playerpos2_x
-        player_y_IA = current_game.playerpos2_y
-
-        movement_position_IA = {"x": movement["x"], "y": movement["y"]}
-        player_data_IA = {
-            "x": player_x_IA,
-            "y": player_y_IA,
-            "symbol": player_symbol_IA
-        }
-        result_IA = is_valid_movement(movement_position_IA, array_string_human, player_data_IA)
-
-    current_player = player1_id
+    current_player = player1_id #todo  : utile ? 
     db.session.commit() 
 
     new_x_IA, new_y_IA, array_string_IA = result_IA
-    new_player_x, new_player_y, last_player_x,last_player_y = current_game.apply_movement(new_x_IA,new_y_IA,array_string_IA)
+    new_player_x, new_player_y, last_player_x, last_player_y = current_game.apply_movement(new_x_IA,new_y_IA,array_string_IA)
     checkBoard()
-    array_string_IA = current_game.boxes
+    array_string_IA = current_game.boxes #todo : cela sert a quoi deja 
     winner = check_winner(array_string_IA)
     return jsonify({"new_grid" : array_string_IA, "new_current_player_x" : new_player_x, "new_current_player_y" : new_player_y, "other_x": last_player_x, "other_y": last_player_y, "winner" : winner })
 
