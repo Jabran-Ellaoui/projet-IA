@@ -79,12 +79,12 @@ class QTable(db.Model):
     esperance_right = db.Column(db.Float, nullable=True, default=0.0)
     esperance_down = db.Column(db.Float, nullable=True, default=0.0)
 
-    def __init__(self, state_board, esperance_droit=0.0, esperance_gauche=0.0, esperance_haut=0.0, esperance_bas=0.0):
+    def __init__(self, state_board, esperance_right=0.0, esperance_left=0.0, esperance_up=0.0, esperance_down=0.0):
         self.state_board = state_board
-        self.esperance_droit = esperance_droit
-        self.esperance_gauche = esperance_gauche
-        self.esperance_haut = esperance_haut
-        self.esperance_bas = esperance_bas
+        self.esperance_right = esperance_right
+        self.esperance_left = esperance_left
+        self.esperance_up = esperance_up
+        self.esperance_down = esperance_down
 
 class History(db.Model):
     __tablename__ = 'history'

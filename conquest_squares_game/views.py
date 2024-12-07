@@ -98,6 +98,7 @@ def travel_request():
     result_human = is_valid_movement(movement_position, array_string, player_data)
 
     if result_human == - 1 :
+        array_string_human = None
         return "-1"
     if (current_player == player1_id):
         new_x_human, new_y_human, array_string_human = result_human
