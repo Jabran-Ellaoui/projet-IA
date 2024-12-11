@@ -180,10 +180,6 @@ def exploitation(q_entry, valides_possibles_moves):
         (q_entry.esperance_left, valides_possibles_moves[3])
     ]
     #print(esperances_moves)
-    print("Esperance up ", q_entry.esperance_up)
-    print("Esperance right ", q_entry.esperance_right)
-    print("Esperance down ", q_entry.esperance_down)
-    print("Esperance left ", q_entry.esperance_left)
     valid_esperances_moves = [(esperance, move) for esperance, move in esperances_moves if esperance is not None and move is not None]
 
     max_esperance, best_move = max(valid_esperances_moves, key=lambda x: x[0])
@@ -218,7 +214,6 @@ def get_move(current_game, valides_possibles_moves, epsilon=0.1, alpha=0.2, gamm
     Cette fonction applique également l'apprentissage par renforcement (Q-learning) pour mettre à jour les valeurs d'espérance 
     (Q-values) après chaque mouvement.
     """
-    print("mouvement possibles (debut get_move) : ",valides_possibles_moves)
     # cr�e ID de l'instance possible de QTable, a partir du plateau actuelle 
     state_board = encode_state_board(
     current_game.boxes,
