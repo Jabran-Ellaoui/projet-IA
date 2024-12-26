@@ -121,7 +121,7 @@ def check_winner(grid_string):
     elif count_player2 > count_player1:
          return 2  # L'IA a gagné
     else:
-        return 3  # Égalité ou aucun gagnant déterminé (optionnel)
+         return 3  # Égalité ou aucun gagnant déterminé (optionnel)
 
 
 def bfs(initial_x, initial_y, totalRows, totalColumns, board):

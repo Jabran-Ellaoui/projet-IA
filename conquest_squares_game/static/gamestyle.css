@@ -1,24 +1,116 @@
-body 
-{
+body {
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background-color: #000; /* Fond noir */
-    color: #fff; /* Texte blanc pour le contraste */
+    background-color: #f4f4f9; /* Fond légèrement gris clair pour contraster avec le plateau */
+    color: #333; /* Texte plus sombre pour plus de lisibilité */
+    margin: 0; /* Pour supprimer les marges par défaut */
 }
 
-table 
-{
+table {
+    border-collapse: collapse;
+    background-color: #fff; /* Fond blanc pour le plateau */
+    border: 2px solid #1E90FF; /* Bordure bleue un peu plus fine pour la modernité */
+    border-radius: 12px; /* Coins arrondis pour un effet plus doux */
+    box-shadow: 0 8px 15px rgba(0, 0, 255, 0.2); /* Ombre plus marquée et diffuse pour de la profondeur */
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out; /* Animation fluide pour l'effet au survol */
+    padding: 10px; /* Espacement autour du plateau */
+    /* margin-right: 100px; Supprimer cette ligne pour un centrage parfait */
+}
+
+/* Effet au survol du plateau */
+table:hover {
+    transform: translateY(-5px); /* Légère élévation du plateau pour un effet interactif */
+    box-shadow: 0 12px 20px rgba(0, 0, 255, 0.3); /* Ombre plus prononcée lors du survol */
+}
+
+/* Style des cellules du plateau */
+td {
+    width: 60px;
+    height: 60px;
+    border: 1px solid #ddd; /* Bordure plus douce et discrète */
+    text-align: center;
+    vertical-align: middle;
+    background-color: #fafafa; /* Fond légèrement gris pour chaque cellule */
+    border-radius: 8px; /* Coins arrondis pour un design plus moderne */
+    transition: background-color 0.3s, transform 0.2s; /* Animation de couleur et léger effet de transformation */
+}
+
+/* Style des cases actives (par exemple, lorsque le joueur a joué) */
+td.active {
+    background-color: #1E90FF; /* Couleur bleue pour indiquer une case active */
+    color: #fff; /* Texte blanc pour une meilleure visibilité */
+}
+
+h2#turnMessage {
+    color: red;
+    text-align: center;
+    position: absolute;
+    top: 65%; /* Positionne à 80% de la hauteur de l'écran (ou ajuster selon ta préférence) */
+    left: 50%; /* Centre horizontalement */
+    transform: translateX(-50%); /* Ajuste la position pour un centré parfait */
+    margin: 0; /* Supprime les marges par défaut */
+}
+
+.menu {
+    position: absolute; /* Position absolue par rapport au body */
+    top: 50%; /* Centre verticalement */
+    right: 100px; /* Distance par rapport à la droite */
+    top: 300px;
+    transform: translateY(-50%); /* Ajuste pour un centré parfait */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #f9f9f9; /* Fond clair pour le menu */
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    min-width: 200px; /* Largeur minimale pour le menu */
+    height: fit-content; /* Ajuste la hauteur au contenu */
+}
+
+
+button {
+    padding: 15px 25px; /* Espacement interne */
+    font-size: 1rem; /* Taille du texte */
+    cursor: pointer;
+    border: none; /* Pas de bordure */
+    border-radius: 3px; /* Légèrement arrondi */
+    background-color: #3498db; /* Couleur bleue principale */
+    color: white; /* Texte blanc */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Ombre du bouton */
+    transition: transform 0.2s, box-shadow 0.2s; /* Animations au survol */
+    margin: 20px 0;
+}
+
+button:hover {
+    transform: translateY(-2px); /* Léger effet de survol */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Accentuation de l'ombre */
+    background-color: #2980b9; /* Couleur bleue foncée */
+}
+
+table {
     border-collapse: collapse;
 }
 
-td 
-{
+td {
     width: 50px;
     height: 50px;
-    border: 1px solid #ccc;
+    border: 1px solid black;
     text-align: center;
     vertical-align: middle;
-    background-color: #fff; /* Couleur de fond des cellules */
 }
+
+.player1 {
+    background-color: greenyellow;
+}
+
+.player2 {
+    background-color: palevioletred;
+}
+
+.occupied {
+    font-weight: bold;
+}
+

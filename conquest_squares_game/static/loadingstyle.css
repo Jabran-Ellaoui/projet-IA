@@ -1,0 +1,35 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #f4f4f9; /* Fond gris clair */
+    font-family: 'Roboto', sans-serif; /* Police moderne */
+}
+
+.loading-container {
+    text-align: center; /* Centre le texte */
+}
+
+.spinner {
+    border: 8px solid #f3f3f3; /* Couleur de fond de l'anneau */
+    border-top: 8px solid #3498db; /* Couleur de l'anneau en mouvement */
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1.5s linear infinite;
+    margin-bottom: 10px; /* Espace entre le spinner et le texte */
+    margin-left: 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+p {
+    font-size: 1.2rem; /* Taille du texte */
+    color: #2c3e50; /* Couleur du texte */
+    margin-top: 5px; /* Ajustez cette valeur pour centrer verticalement */
+}

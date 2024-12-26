@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chargement...</title>
+    <link rel="stylesheet" href="../static/loadingstyle.css">
+</head>
+<body>
+    <div class="loading-container">
+        <div class="spinner"></div>
+        <p>Chargement...</p>
+    </div>
+
+    <script>
+        // Simuler un délai de chargement de 3 secondes avant la redirection
+        setTimeout(function() {
+            window.location.href = 'game'; // Redirection vers la page game.html après le délai
+        }, 2000);
+    </script>
+</body>
+</html>

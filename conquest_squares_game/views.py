@@ -1,13 +1,16 @@
 import time
 from collections import deque
 
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, redirect, url_for
 from .models import db, Player, Game
 from .ai import get_move
 from sqlalchemy.exc import SQLAlchemyError
 from .viewsFunctions import *
 
+
+
 app = Flask(__name__)
+
 
 app.config.from_object('config')
 
@@ -16,6 +19,12 @@ def index():
     return render_template("index.html")
 def content(content_id):
     return content_id
+
+@app.route('/loading')
+def loading():
+    # Simuler un délai de chargement (par exemple 3 secondes)
+    time.sleep(1)
+    return render_template("loading.html")
 
 @app.route('/game')
 def jeu():
@@ -95,24 +104,32 @@ def travel_request():
         "symbol": player_symbol
     }
 
-    result_human = is_valid_movement(movement_position, array_string, player_data)
+    result_player1 = is_valid_movement(movement_position, array_string, player_data)
+    
+    if result_player1 == - 1 :
+        return jsonify({
+        "new_grid": current_game.boxes,
+        "winner": check_winner(current_game.boxes),
+        "new_current_player_x": current_game.playerpos1_x,
+        "new_current_player_y": current_game.playerpos1_y,
+        "other_x": current_game.playerpos2_x,    # ou vice versa si needed
+        "other_y": current_game.playerpos2_y
+    }), 400  # code HTTP 400 Bad Request, par ex.
 
-    if result_human == - 1 :
-        array_string_human = None
-        return "-1"
+
     if (current_player == player1_id):
-        new_x_human, new_y_human, array_string_human = result_human
+        new_x_player1, new_y_player1, array_string_player1 = result_player1
         # pour enregister les nouvelles positions, et position, et passé la main à l'IA
-        last_player_x, last_player_y, new_player_x, new_player_y = current_game.apply_movement(new_x_human,new_y_human,array_string_human)
+        last_player_x, last_player_y, new_player_x, new_player_y = current_game.apply_movement(new_x_player1,new_y_player1,array_string_player1)
         
         current_player = player2_id
         db.session.commit()
     # changement appliquer : on donne a l'IA, les differents mouvements possibles, (todo : pour respecter les couches ?)
-    possibles_moves = valides_possibles_moves(array_string_human, {"x" : last_player_x, "y" : last_player_y, "symbol" : "2"})
+    possibles_moves = valides_possibles_moves(array_string_player1, {"x" : last_player_x, "y" : last_player_y, "symbol" : "2"})
     # après avoir choisies le mouvement, l'ia apliquer les changements a la base de donnees, elle renvoie le resultat pour l'affichage 
     chosen_move = get_move(current_game, possibles_moves)
     #print("choise move :",chosen_move)
-    result_IA = is_valid_movement(chosen_move, array_string_human, {"x": last_player_x,"y": last_player_y, "symbol" : "2"})
+    result_IA = is_valid_movement(chosen_move, array_string_player1, {"x": last_player_x,"y": last_player_y, "symbol" : "2"})
 
     current_player = player1_id #todo  : utile ? 
     db.session.commit() 

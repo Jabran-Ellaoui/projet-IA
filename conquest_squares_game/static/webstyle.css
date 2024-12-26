@@ -1,47 +1,72 @@
-/* styles/webstyle.css */
-body 
-{
+/* styles/cubicstyle.css */
+body {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     height: 100vh;
     margin: 0;
-    background: linear-gradient(to bottom, #87CEFA, #B0E0E6); /* Dégradé bleu ciel */
-    font-family: Arial, sans-serif; /* Police de caractères */
+    background: #f4f4f9; /* Fond gris clair */
+    font-family: 'Roboto', sans-serif; /* Police moderne */
+    color: #333; /* Couleur de texte sobre */
 }
 
-h1 
-{
-    text-align: center; /* Centrer le titre */
-    margin-bottom: 20px; /* Espace en dessous du titre */
+h1 {
+    text-align: center;
+    font-size: 2.5rem; /* Taille de titre */
+    margin-bottom: 20px;
+    color: #2c3e50; /* Couleur sombre */
+    text-transform: uppercase; /* Texte en majuscule */
+    letter-spacing: 2px; /* Espacement des lettres */
 }
 
-button 
-{
-    padding: 10px 20px; /* Padding du bouton */
-    font-size: 16px; /* Taille de police du bouton */
-    cursor: pointer; /* Curseur pointer sur le bouton */
+button {
+    padding: 15px 25px; /* Espacement interne */
+    font-size: 1rem; /* Taille du texte */
+    cursor: pointer;
     border: none; /* Pas de bordure */
-    border-radius: 5px; /* Coins arrondis */
-    background-color: #4682B4; /* Couleur de fond du bouton */
-    color: white; /* Couleur du texte du bouton */
-    transition: background-color 0.3s; /* Transition pour le survol */
+    border-radius: 3px; /* Légèrement arrondi */
+    background-color: #3498db; /* Couleur bleue principale */
+    color: white; /* Texte blanc */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Ombre du bouton */
+    transition: transform 0.2s, box-shadow 0.2s; /* Animations au survol */
 }
 
-button:hover 
-{
-    background-color: #4169E1; /* Couleur au survol */
+button:hover {
+    transform: translateY(-2px); /* Léger effet de survol */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Accentuation de l'ombre */
+    background-color: #2980b9; /* Couleur bleue foncée */
 }
 
-.introduction 
-{
-    margin-top: 20px; /* Espace au-dessus de l'explication */
-    text-align: center; /* Centrer le texte d'explication */
-    max-width: 600px; /* Largeur maximale de l'explication */
-    padding: 15px; /* Espacement interne */
-    border: 2px solid #4682B4; /* Bordure du bloc */
-    border-radius: 10px; /* Coins arrondis du bloc */
-    background-color: transparent; /* Couleur de fond du bloc */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Ombre du bloc */
+.introduction {
+    margin-top: 20px;
+    text-align: center;
+    max-width: 500px; /* Largeur fixe */
+    padding: 20px; /* Espacement interne */
+    border: 2px solid #bdc3c7; /* Bordure grise */
+    border-radius: 5px; /* Coins légèrement arrondis */
+    background-color: #ffffff; /* Fond blanc */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Ombre subtile */
+    font-size: 1rem; /* Taille de texte */
+    line-height: 1.5; /* Hauteur de ligne */
+}
+
+/* Conteneur des cubes */
+.background-cubes {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: -1; /* Place les cubes derrière le contenu principal */
+}
+
+/* Style des cubes */
+.cube {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    border-radius: 5px;
+    transition: all 0.1s linear; /* Transition rapide pour les changements de direction */
 }
