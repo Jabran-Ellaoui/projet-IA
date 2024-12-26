@@ -6,20 +6,56 @@ body {
     align-items: center;
     height: 100vh;
     margin: 0;
-    background: #f4f4f9; /* Fond gris clair */
+    background: linear-gradient(to bottom, #e0b3ff, #6a0dad); /* Dégradé violet clair vers violet foncé */
     font-family: 'Roboto', sans-serif; /* Police moderne */
     color: #333; /* Couleur de texte sobre */
 }
-
 h1 {
     text-align: center;
-    font-size: 2.5rem; /* Taille de titre */
+    font-size: 8rem; /* Augmenter la taille du titre */
     margin-bottom: 20px;
     color: #2c3e50; /* Couleur sombre */
     text-transform: uppercase; /* Texte en majuscule */
     letter-spacing: 2px; /* Espacement des lettres */
+    font-family: 'Honk', sans-serif; /* Application de la police Honk */
+    animation: float 3s ease-in-out infinite; /* Ajouter l'animation flottante */
+}
+@keyframes float {
+    0% {
+        transform: translateY(0); /* Position de départ */
+    }
+    50% {
+        transform: translateY(-20px); /* Déplacement vers le haut */
+    }
+    100% {
+        transform: translateY(0); /* Retour à la position de départ */
+    }
+}
+/* Conteneur pour les boutons */
+.button-container {
+    display: flex; /* Utiliser flexbox pour aligner les boutons horizontalement */
+    align-items: center; /* Centrer verticalement les boutons */
+    gap: 10px; /* Espacement entre les boutons */
+    margin: 20px; /* Marge autour du conteneur */
 }
 
+/* Style pour le bouton audio */
+#playPauseButton {
+    font-size: 24px; /* Taille de l'icône */
+    cursor: pointer; /* Curseur en forme de main */
+    background: none; /* Pas de fond */
+    border: none; /* Pas de bordure */
+    outline: none; /* Pas de contour */
+    padding: 10px; /* Ajout d'un peu d'espace autour du texte */
+    transition: color 0.3s; /* Transition douce pour le changement de couleur */
+}
+
+/* Optionnel : Ajoutez un effet au survol */
+#playPauseButton:hover {
+    color: #007BFF; /* Change la couleur au survol */
+}
+
+/* Style pour le bouton "Join the game" */
 button {
     padding: 15px 25px; /* Espacement interne */
     font-size: 1rem; /* Taille du texte */

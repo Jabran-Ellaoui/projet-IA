@@ -1,7 +1,7 @@
 import time
 from collections import deque
 
-from flask import Flask, render_template, request, jsonify, redirect, url_for
+from flask import Flask, render_template, request, jsonify, redirect, url_for, send_from_directory
 from .models import db, Player, Game
 from .ai import get_move
 from sqlalchemy.exc import SQLAlchemyError
@@ -10,22 +10,37 @@ from .viewsFunctions import *
 
 
 app = Flask(__name__)
-
-
 app.config.from_object('config')
 
+######################################################################################
 @app.route('/')
 def index():
     return render_template("index.html")
 def content(content_id):
     return content_id
 
+######################################################################################
+'''
+Route relative à l'écran de chargement
+'''
 @app.route('/loading')
 def loading():
     # Simuler un délai de chargement (par exemple 3 secondes)
     time.sleep(1)
     return render_template("loading.html")
 
+######################################################################################
+'''
+Route relative à la lecture des fichiers audios
+'''
+@app.route('/audio/<path:filename>')
+def serve_audio(filename):
+    return send_from_directory('audio', filename)
+
+######################################################################################
+'''
+Route relative à la lecture du jeu
+'''
 @app.route('/game')
 def jeu():
     '''
@@ -61,8 +76,10 @@ def jeu():
     # Passer `id_game` à la vue pour l'utiliser dans le frontend
     return render_template('game.html', game_id=new_game.id_game, grid_state = new_game.boxes )
 
-
-
+######################################################################################
+'''
+Route relative aux requêtes
+'''
 @app.route('/travel_request', methods=['POST'])
 def travel_request():
     '''

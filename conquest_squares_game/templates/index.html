@@ -4,17 +4,45 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../static/webstyle.css">
+    <link href="https://fonts.googleapis.com/css2?family=Honk&display=swap" rel="stylesheet">
     <title>Game</title>
 </head>
 <body>
-    <h1>Welcome to Train your AI</h1>
-    <button onclick="window.location.href='loading'">Join the game</button>
+    <h1>GET YOUR CELL</h1>
+    <audio id="myAudio"src="../audio/index-song.mp3" loop autoplay></audio>
+
+    <div class="button-container">
+        <button onclick="window.location.href='loading'">Join the game</button>
+        <button id="playPauseButton">🔊</button>
+    </div>
+
     <div class="introduction">
         Train your AI is a board game where you need to fill more squares than the opponent. We used this game to train our first AI project based on machine learning.
         Github repository : https://github.com/Jabran-Ellaoui/projet-IA
     </div>
     <div class="background-cubes"></div>
-    <script src="../static/animation.js"></script>
+    <script src="../static/index.js"></script>
+    <script>
+        const audio = document.getElementById('myAudio');
+        const playPauseButton = document.getElementById('playPauseButton');
+        
+        // État de lecture de l'audio
+        let isPlaying = false;
+        
+        // Fonction pour jouer ou mettre en pause l'audio
+        playPauseButton.addEventListener('click', () => {
+            if (isPlaying) {
+                audio.pause();
+                playPauseButton.textContent = '🔊';
+            } else {
+                audio.play().catch(error => {
+                    console.error("Erreur lors de la lecture audio :", error);
+                });
+                playPauseButton.textContent = '🔇';
+            }
+            isPlaying = !isPlaying;
+        });</script>
+
 </body>
 
 </html>

@@ -74,7 +74,7 @@ def encode_state_board(boxes, player1_x, player1_y, player2_x, player2_y):
     # Join rows back into a single string separated by spaces
     return " ".join(encoded_rows)
 
-def calculate_cell_capture_reward(previous_boxes, new_boxes, ai_symbol="2"):
+def calculate_cell_capture_reward(previous_boxes, new_boxes, ai_symbol):
     """
     Calcule la récompense basée sur le nombre de cases capturées par l'IA.
 

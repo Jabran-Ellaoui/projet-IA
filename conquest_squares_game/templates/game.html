@@ -38,7 +38,6 @@
         gridElement.innerHTML = '';  // Effacer la grille actuelle
 
         const rows = gridString.trim().split(' '); // Diviser le string par lignes
-        console.log("   !!! une tour est passé !!! ")
         for (let i = 0; i < rows.length; i++) {
             const row = document.createElement('tr');
             for (let j = 0; j < rows[i].length; j++) {
