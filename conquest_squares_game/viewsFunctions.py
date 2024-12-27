@@ -2,8 +2,13 @@ from flask import Flask, render_template, request, jsonify
 from .models import db, Player, Game
 from collections import deque
 
-
-
+#un string pour chaque mouvement possible
+DIRECTION_MAP = {
+        (0, -1): "up",
+        (1, 0): "right",
+        (0, 1): "down",
+        (-1, 0): "left"
+    }
 
 #Description des paramètres
 def is_valid_movement(movement, array_string, player):
@@ -56,9 +61,8 @@ def is_valid_movement(movement, array_string, player):
     else:
         #print(f"Le mouvement {movement} est invalide: la cellule est occupée par {target_cell}")
         return -1
-    
-
-# renvoie l'entierete des mmouvements valides pour l'ia sous la forme d'un tableau de 4 cellule (haut, droit, bas, gauche)
+  
+#renvoie les mouvements valides sous la forme d'un x et d'un y
 def valides_possibles_moves(array_string, player) :
     """
     Retourne une liste de mouvements valides et leurs conséquences sur l'état du jeu.
@@ -79,14 +83,15 @@ def valides_possibles_moves(array_string, player) :
 
     Retourne :
     - list : Une liste de mouvements valides et leurs conséquences. Chaque élément est soit un dictionnaire avec les attributs `x`, `y`, 
-      soit `None` si le mouvement n'est pas valide. Les mouvements sont testés selon les coordonnées possibles : haut, droite, bas, gauche.
+    . Les mouvements sont testés selon les coordonnées possibles : haut, droite, bas, gauche.
     """
     valid_moves_and_cons = []
     possibles_moves = [{"x": 0, "y" : -1},{"x": 1, "y" : 0},{"x": 0, "y" : 1},{"x": -1, "y" : 0}]
-    
     for tested_move in possibles_moves :
         result_move = is_valid_movement(tested_move, array_string, player)
-        valid_moves_and_cons.append(tested_move if result_move != -1 else None)       
+        if result_move != -1 : 
+            
+            valid_moves_and_cons.append(DIRECTION_MAP[tested_move["x"],tested_move["y"]])       
 
     return valid_moves_and_cons 
     

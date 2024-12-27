@@ -8,9 +8,15 @@ from sqlalchemy.exc import SQLAlchemyError
 from .viewsFunctions import *
 
 
-
 app = Flask(__name__)
 app.config.from_object('config')
+
+MOVE = {
+    "up": {"x" : 0,"y" : -1},
+    "right": {"x" : 1, "y" : 0},
+    "down": {"x" : 0, "y" : 1},
+    "left": {"x" : -1, "y" : 0}
+}
 
 ######################################################################################
 @app.route('/')
@@ -133,7 +139,6 @@ def travel_request():
         "other_y": current_game.playerpos2_y
     }), 400  # code HTTP 400 Bad Request, par ex.
 
-
     if (current_player == player1_id):
         new_x_player1, new_y_player1, array_string_player1 = result_player1
         # pour enregister les nouvelles positions, et position, et passé la main à l'IA
@@ -141,20 +146,24 @@ def travel_request():
         
         current_player = player2_id
         db.session.commit()
-    # changement appliquer : on donne a l'IA, les differents mouvements possibles, (todo : pour respecter les couches ?)
+
+    # changement appliquer : on donne a l'IA, les differents mouvements possibles
     possibles_moves = valides_possibles_moves(array_string_player1, {"x" : last_player_x, "y" : last_player_y, "symbol" : "2"})
+    
     # après avoir choisies le mouvement, l'ia apliquer les changements a la base de donnees, elle renvoie le resultat pour l'affichage 
     chosen_move = get_move(current_game, possibles_moves)
-    #print("choise move :",chosen_move)
-    result_IA = is_valid_movement(chosen_move, array_string_player1, {"x": last_player_x,"y": last_player_y, "symbol" : "2"})
 
-    current_player = player1_id #todo  : utile ? 
+
+    #print("choise move :",chosen_move)
+    result_IA = is_valid_movement(MOVE[chosen_move], array_string_player1, {"x": last_player_x,"y": last_player_y, "symbol" : "2"})
+
+    current_player = player1_id
     db.session.commit() 
 
     new_x_IA, new_y_IA, array_string_IA = result_IA
     new_player_x, new_player_y, last_player_x, last_player_y = current_game.apply_movement(new_x_IA,new_y_IA,array_string_IA)
     checkBoard()
-    array_string_IA = current_game.boxes #todo : cela sert a quoi deja 
+    array_string_IA = current_game.boxes
     winner = check_winner(array_string_IA)
     return jsonify({"new_grid" : array_string_IA, "new_current_player_x" : new_player_x, "new_current_player_y" : new_player_y, "other_x": last_player_x, "other_y": last_player_y, "winner" : winner })
 

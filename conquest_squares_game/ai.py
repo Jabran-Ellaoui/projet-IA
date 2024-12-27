@@ -96,47 +96,29 @@ def calculate_cell_capture_reward(previous_boxes, new_boxes, ai_symbol):
     previous_ai_cells = previous_boxes.count(ai_symbol)
     new_ai_cells = new_boxes.count(ai_symbol)
 
+    # penalty depending on the opponent
+    previous_other_player_cells = sum(1 for symbol in previous_boxes if symbol not in [' ', 'x', ai_symbol])
+    new_other_player_cells = sum(1 for symbol in new_boxes if symbol not in [' ', 'x', ai_symbol])
+
     # Reward is proportional to the increase in AI-controlled cells
-    reward = new_ai_cells - previous_ai_cells
+    reward = (new_ai_cells - previous_ai_cells if new_ai_cells - previous_ai_cells > 0 else -1) - 0.5 * (new_other_player_cells - previous_other_player_cells)
+    
+    if 'x' not in new_boxes :
+        if new_ai_cells > new_other_player_cells : 
+            reward += 10
+        else :
+            reward -= 10
 
     # Add a small penalty if no cells were captured
     #print(new_boxes)
     #print("new ai cells", new_ai_cells)
     #print("previous ai cells", previous_ai_cells)
     #print("Reward : ", reward)
-    return reward if reward > 0 else -1
+    return reward 
 
-def reset_esperance (qTable_instance, possibles_moves) :
-    """
-    Réinitialise les valeurs d'espérance des mouvements possibles dans une instance de QTable.
 
-    Cette fonction met à zéro les valeurs d'espérance pour les mouvements possibles de l'IA (haut, bas, gauche, droite)
-    dans l'instance de QTable, en fonction de la liste des mouvements possibles fournie.
-
-    Paramètres :
-    - qTable_instance (QTable) : Une instance de la classe `QTable` qui contient les valeurs d'espérance pour chaque mouvement.
-    - possibles_moves (list) : Une liste de booleans représentant les mouvements possibles. 
-      Chaque élément de la liste indique si le mouvement correspondant (haut, droite, bas, gauche) est possible :
-      - possibles_moves[0] : Mouvement vers le haut
-      - possibles_moves[1] : Mouvement vers la droite
-      - possibles_moves[2] : Mouvement vers le bas
-      - possibles_moves[3] : Mouvement vers la gauche
-
-    Retourne :
-    - QTable : L'instance de `QTable` avec les valeurs d'espérance réinitialisées pour les mouvements possibles.
-    """ 
-    if(possibles_moves[0]) :
-        qTable_instance.esperance_up = 0.0
-    if(possibles_moves[1]) :
-        qTable_instance.esperance_right = 0.0
-    if (possibles_moves[2]) : 
-        qTable_instance.esperance_down = 0.0
-    if(possibles_moves[3]) :
-        qTable_instance.esperance_left = 0.0
-
-    return qTable_instance
 # si on veut creer une instance, il faut savoir les quelles sont nullables
-def instance_QTable(state_board, possibles_moves):
+def instance_QTable(state_board):
     """
     Récupère ou crée une entrée dans la table Q pour l'état actuel du jeu.
 
@@ -146,8 +128,6 @@ def instance_QTable(state_board, possibles_moves):
 
     Paramètres :
     - state_board (str) : La représentation de l'état actuel du plateau de jeu, sous forme de chaîne de caractères.
-    - possibles_moves (list) : Une liste représentant les mouvements possibles. Chaque élément est un booléen indiquant 
-      si un mouvement dans une direction (haut, bas, gauche, droite) est valide.
 
     Retourne :
     - QTable : L'instance de la table Q correspondant à l'état du jeu. Si elle n'existait pas, elle a été créée et 
@@ -167,7 +147,7 @@ def instance_QTable(state_board, possibles_moves):
         db.session.commit()
     return qTable_instance
 
-def exploration (valides_possibles_moves):
+def exploration (possibles_moves):
     """
     Effectue une exploration en choisissant aléatoirement un mouvement valide parmi les mouvements possibles.
 
@@ -176,17 +156,14 @@ def exploration (valides_possibles_moves):
     stratégie d'exploration dans un algorithme d'apprentissage par renforcement (comme le Q-learning).
 
     Paramètres :
-    - valides_possibles_moves (list) : Une liste des mouvements possibles, où chaque mouvement peut être une
-      direction valide (par exemple, "haut", "bas", "gauche", "droite") ou `None` si le mouvement n'est pas possible.
+    - possibles_moves (list) : Une liste des mouvements possibles sous la forme d'un string ("right","left","up","down")
 
     Retourne :
-    - Le mouvement choisi aléatoirement parmi les mouvements valides. Ce mouvement peut être sous forme de tuple ou 
-      toute autre structure définie selon votre implémentation des mouvements.
+    - Le mouvement choisi aléatoirement parmi les mouvements valides toujours sous la forme d'un string. 
     """
-    filtered_moves = [move for move in valides_possibles_moves if move is not None]
-    return random.choice(filtered_moves)
+    return random.choice(possibles_moves)
 
-def exploitation(q_entry, valides_possibles_moves):
+def exploitation(q_entry, possibles_moves):
     """
     Effectue une exploitation en choisissant le mouvement avec la plus grande espérance parmi les mouvements possibles.
 
@@ -197,30 +174,30 @@ def exploitation(q_entry, valides_possibles_moves):
     Paramètres :
     - q_entry (QTable) : Une instance de la table Q qui contient les valeurs d'espérance pour chaque direction de mouvement 
       (haut, droite, bas, gauche).
-    - valides_possibles_moves (list) : Une liste des mouvements possibles, où chaque élément correspond à un mouvement valide 
-      (par exemple, "haut", "bas", "gauche", "droite") ou `None` si un mouvement n'est pas valide.
+    - possibles_moves (list) : Une liste des mouvements possibles, où chaque élément correspond à un mouvement valide 
+      (par exemple, "haut", "bas", "gauche", "droite").
 
     Retourne :
-    - tuple : Le mouvement choisi, représenté par un tuple contenant l'espérance et le mouvement associé. 
-      Le mouvement choisi est celui avec l'espérance maximale parmi les mouvements valides.
+    - string : le mouvement avec l'espérance la plus grande.
     """
-    esperances_moves = [
-        (q_entry.esperance_up, valides_possibles_moves[0]),
-        (q_entry.esperance_right, valides_possibles_moves[1]),
-        (q_entry.esperance_down, valides_possibles_moves[2]),
-        (q_entry.esperance_left, valides_possibles_moves[3])
-    ]
-    valid_esperances_moves = [(esperance, move) for esperance, move in esperances_moves if esperance is not None and move is not None]
+    esperances_moves = {
+        "up": q_entry.esperance_up,
+        "right": q_entry.esperance_right,
+        "down": q_entry.esperance_down,
+        "left": q_entry.esperance_left
+    }
+    
+    # Filtrer pour ne garder que les mouvements valides
+    valid_esperances = {move: esperances_moves[move] for move in possibles_moves}
 
-    max_esperance, best_move = max(valid_esperances_moves, key=lambda x: x[0])
-
-
-
+    # Trouver le mouvement avec la valeur d'espérance maximale
+    best_move = max(valid_esperances, key=valid_esperances.get)
+    
     return best_move
 
 
 # en fait je pense que cette fonction ne fait que renvoie un mouvement pas besoin de plus d'�l�ment, il seront ajout� plus loin. 
-def get_move(current_game, valides_possibles_moves, epsilon=0.1, alpha=0.2, gamma=0.9):
+def get_move(current_game, possibles_moves, epsilon=0.1, alpha=0.2, gamma=0.9):
     """
     L'IA choisit et apprend un mouvement en utilisant la logique du Q-learning.
 
@@ -231,14 +208,14 @@ def get_move(current_game, valides_possibles_moves, epsilon=0.1, alpha=0.2, gamm
     Paramètres :
     - current_game (Game) : L'instance actuelle du jeu qui contient les informations sur l'état du plateau et 
       les positions des joueurs.
-    - valides_possibles_moves (list) : Liste des mouvements possibles (par exemple, mouvement vers le haut, bas, gauche, droite).
+    - possibles_moves (list of string) : Liste des mouvements possibles (par exemple, mouvement vers le haut, bas, gauche, droite).
     - epsilon (float, optionnel) : Le taux d'exploration. Définit la probabilité que l'IA choisisse un mouvement aléatoire.
       Par défaut, c'est 0.1.
     - alpha (float, optionnel) : Le taux d'apprentissage. Définit à quel point l'IA met à jour ses valeurs d'espérance. Par défaut, c'est 0.2.
     - gamma (float, optionnel) : Le facteur de discount. Définit l'importance des récompenses futures. Par défaut, c'est 0.9.
 
     Retourne :
-    - dict : Le mouvement choisi sous forme d'un dictionnaire contenant les coordonnées x et y du mouvement sélectionné.
+    - dict : le mouvement choisie sous la forme d'un string
 
     Cette fonction applique également l'apprentissage par renforcement (Q-learning) pour mettre à jour les valeurs d'espérance 
     (Q-values) après chaque mouvement.
@@ -250,35 +227,24 @@ def get_move(current_game, valides_possibles_moves, epsilon=0.1, alpha=0.2, gamm
     current_game.playerpos1_y,
     current_game.playerpos2_x,
     current_game.playerpos2_y
-)
+    )
 
     #print("Current State Board:", state_board)
     # cree ou recupere une instance de qtable selon sont existance par rapport a un etat donnee d'un plateau 
-    q_entry = instance_QTable(state_board, valides_possibles_moves)
+    q_entry = instance_QTable(state_board)
     
     # Exploration vs. Exploitation
     if random.random() < epsilon:
         # Exploration: Choose a random move
-        chosen_move = exploration(valides_possibles_moves)
+        chosen_move = exploration(possibles_moves)
         print(Fore.GREEN + "[INFO] : L'IA a choisi l'exploration")
     else:
         # Exploitation: Choose the best move based on esperances of an instance of Q-values
-        chosen_move = exploitation(q_entry, valides_possibles_moves)
+        chosen_move = exploitation(q_entry, possibles_moves)
         print(Fore.GREEN + "[INFO] : L'IA a choisi l'exploitation")
         
-    movement_tuple = (chosen_move["x"],chosen_move["y"])
-    match(movement_tuple):
-        case (0,-1):
-            string_move = "up"
-        case (1,0):
-            string_move = "right"
-        case (0,1):
-            string_move = "down"
-        case (-1,0):
-            string_move = "left" 
-
-
-    learning_by_renforcing(current_game.current_player,current_game.id_game, q_entry, string_move, epsilon, alpha, gamma )
+    # ici string_move : est bien sous sa forme voulue, un string
+    learning_by_renforcing(current_game.current_player,current_game.id_game, q_entry, chosen_move, epsilon, alpha, gamma )
 
     return chosen_move
 
@@ -293,7 +259,7 @@ def learning_by_renforcing (player_id, game_id, current_qTable_instance, move, e
     - player_id (int) : L'identifiant du joueur effectuant le mouvement (IA ou humain).
     - game_id (int) : L'identifiant de la partie en cours.
     - current_qTable_instance (QTable) : L'instance de la table Q pour l'état actuel du plateau, contenant les valeurs d'espérance.
-    - move (str) : Le mouvement effectué par l'IA (par exemple, "up", "down", "left", "right").
+    - move (str) : Le mouvement effectué par l'IA choisie par exploration ou exploitation (par exemple, "up", "down", "left", "right").
     - epsilon (float) : Le taux d'exploration (non utilisé directement dans cette fonction, mais lié à la stratégie d'apprentissage).
     - alpha (float) : Le taux d'apprentissage, qui détermine dans quelle mesure les nouvelles informations influencent les valeurs d'espérance.
     - gamma (float) : Le facteur de discount, qui détermine l'importance des récompenses futures dans l'apprentissage.
