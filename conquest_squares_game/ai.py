@@ -22,20 +22,14 @@ def get_max_esperance(q_instance):
 
     Prend en paramètre une instance de la Q_Table et renvoie la valeur maximale possible.
     """
-    esperanceList = []
-    if q_instance.esperance_up is not None:
-        esperanceList.append(q_instance.esperance_up)
-    if q_instance.esperance_right is not None:
-        esperanceList.append(q_instance.esperance_right)
-    if q_instance.esperance_left is not None:
-        esperanceList.append(q_instance.esperance_left)
-    if q_instance.esperance_down is not None:
-        esperanceList.append(q_instance.esperance_down)
-
-    if not esperanceList:
-        return 0.0
-    
-    return max(esperanceList)
+    values = [
+        q_instance.esperance_up,
+        q_instance.esperance_right,
+        q_instance.esperance_down,
+        q_instance.esperance_left
+    ]
+    # Filtre les None et prend le max; par défaut 0.0 si toutes sont None
+    return max((v for v in values if v is not None), default=0.0)
 
 
 def encode_state_board(boxes, player1_x, player1_y, player2_x, player2_y):
@@ -93,27 +87,20 @@ def calculate_cell_capture_reward(previous_boxes, new_boxes, ai_symbol):
       Si aucune case n'a été capturée, une petite pénalité est appliquée, retournant -1. 
       Si des cases ont été capturées, la récompense correspond à l'augmentation du nombre de cases contrôlées.
     """
-    previous_ai_cells = previous_boxes.count(ai_symbol)
-    new_ai_cells = new_boxes.count(ai_symbol)
+    previous_p2_cells = previous_boxes.count(ai_symbol)
+    new_p2_cells = new_boxes.count(ai_symbol)
 
-    # penalty depending on the opponent
-    previous_other_player_cells = sum(1 for symbol in previous_boxes if symbol not in [' ', 'x', ai_symbol])
-    new_other_player_cells = sum(1 for symbol in new_boxes if symbol not in [' ', 'x', ai_symbol])
-
-    # Reward is proportional to the increase in AI-controlled cells
-    reward = (new_ai_cells - previous_ai_cells if new_ai_cells - previous_ai_cells > 0 else -1) - 0.5 * (new_other_player_cells - previous_other_player_cells)
+    previous_p1_cells = sum(1 for symbol in previous_boxes if symbol not in [' ', 'x', ai_symbol])
+    new_p2_cells = sum(1 for symbol in new_boxes if symbol not in [' ', 'x', ai_symbol])
+    
+    reward = (new_p2_cells - previous_p2_cells if new_p2_cells - previous_p2_cells > 0 else -1) - 0.5 * (new_p2_cells - previous_p1_cells)
     
     if 'x' not in new_boxes :
-        if new_ai_cells > new_other_player_cells : 
+        if new_p2_cells > new_p2_cells : 
             reward += 10
         else :
             reward -= 10
 
-    # Add a small penalty if no cells were captured
-    #print(new_boxes)
-    #print("new ai cells", new_ai_cells)
-    #print("previous ai cells", previous_ai_cells)
-    #print("Reward : ", reward)
     return reward 
 
 
@@ -134,18 +121,13 @@ def instance_QTable(state_board):
       ajoutée à la base de données.
     """
     # Fetch or create a Q-table entry for the current state
-    qTable_instance = QTable.query.filter_by(state_board = state_board).first()
-    if not qTable_instance:
-        qTable_instance = QTable(
-            state_board = state_board,
-            esperance_right=0.0,
-            esperance_left=0.0,
-            esperance_up=0.0,
-            esperance_down=0.0
-        )
-        db.session.add(qTable_instance)
+    q_entry = QTable.query.filter_by(state_board=state_board).first()
+    if not q_entry:
+        q_entry = QTable(state_board)
+        db.session.add(q_entry)
         db.session.commit()
-    return qTable_instance
+    return q_entry
+
 
 def exploration (possibles_moves):
     """
@@ -161,6 +143,8 @@ def exploration (possibles_moves):
     Retourne :
     - Le mouvement choisi aléatoirement parmi les mouvements valides toujours sous la forme d'un string. 
     """
+    if not possibles_moves:
+        return None
     return random.choice(possibles_moves)
 
 def exploitation(q_entry, possibles_moves):
@@ -190,10 +174,9 @@ def exploitation(q_entry, possibles_moves):
     # Filtrer pour ne garder que les mouvements valides
     valid_esperances = {move: esperances_moves[move] for move in possibles_moves}
 
-    # Trouver le mouvement avec la valeur d'espérance maximale
-    best_move = max(valid_esperances, key=valid_esperances.get)
-    
-    return best_move
+    if not valid_esperances:
+        return None
+    return max(valid_esperances, key=valid_esperances.get)
 
 
 # en fait je pense que cette fonction ne fait que renvoie un mouvement pas besoin de plus d'�l�ment, il seront ajout� plus loin. 
@@ -287,34 +270,29 @@ def learning_by_renforcing (player_id, game_id, current_qTable_instance, move, e
         reward = calculate_cell_capture_reward(game_history.precedent_state_board, current_qTable_instance.state_board, ai_symbol="2")
 
         previous_move = game_history.precedent_move
-        previoux_instance_QTable = QTable.query.get(game_history.precedent_state_board)
+        previous_instance_QTable = QTable.query.get(game_history.precedent_state_board)
+
         print(Fore.CYAN + f"[INFO] : Mouvement précédent = {previous_move}\n[INFO] : Mouvement actuel = {move}\n[INFO] : Récompense = {reward}\n")
         max_future_value = get_max_esperance(current_qTable_instance)
         print(Fore.CYAN + f"[INFO] : Meilleure valeur estimée pour l'état futur -> {max_future_value}")
 
         old_attr_name = MOVE_TO_ATTR[previous_move]
-        old_value = getattr(previoux_instance_QTable, old_attr_name)
+        old_value = getattr(previous_instance_QTable, old_attr_name)
         if old_value is None:
             old_value = 0.0
         
         new_value = old_value + alpha * (reward + gamma * max_future_value - old_value)
         print(Fore.CYAN + f"[INFO] : Mise à jour des valeurs d'espérance")
         print(Fore.CYAN + f"[INFO] : Ancienne valeur -> {old_value}\n[INFO] : Nouvelle valeur -> {new_value}\n")
-        setattr(previoux_instance_QTable, old_attr_name, new_value)
-
-        if previous_move == "up":
-            previoux_instance_QTable.esperance_up = new_value
-        if previous_move == "right":
-            previoux_instance_QTable.esperance_right = new_value
-        if previous_move == "down":
-            previoux_instance_QTable.esperance_down = new_value
-        if previous_move == "left":
-            previoux_instance_QTable.esperance_left = new_value
+        setattr(previous_instance_QTable, old_attr_name, new_value)
 
         game_history.precedent_state_board = current_qTable_instance.state_board
         game_history.precedent_move = move
     
     db.session.commit()
+
+    
+
 
 
     
