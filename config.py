@@ -8,10 +8,10 @@ SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'app.db')
 
 ### PARAMETRES DE JEU ###
 TABLE_SIZE = 5
-MAX_TURNS = 500
+MAX_TURNS = 10000
 
 
 ### PARAMETRES IA ###
-EPSILON = 0.1
+EPSILON = 0.9
 ALPHA = 0.2
 GAMMA = 0.9

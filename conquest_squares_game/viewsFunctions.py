@@ -215,6 +215,33 @@ def checkBoard():
     current_game.boxes = updated_grid
     db.session.commit()
 
+def checkBoardAI(AIboard):
+    '''
+    La fonction checkBoard ne prend pas de paramètres :
+
+    - Aucun paramètre direct n'est passé, car elle récupère les données de la requête HTTP via request.json.
+    - La fonction utilise game_id pour récupérer l'état actuel du jeu et la grille associée dans la base de données.
+
+    La fonction analyse la grille du jeu, effectue une exploration en largeur (BFS) pour vérifier si des régions sont complètement encerclées par un joueur.
+    Si une région est encerclée, elle est remplie avec le symbole du joueur qui a entouré cette région. La grille mise à jour est ensuite enregistrée dans la base de données.
+
+    Résultat :
+    - Aucun résultat renvoyé directement, la grille du jeu est mise à jour dans la base de données.
+    '''
+    grid = AIboard
+
+    # Convert the grid string into a 2D list
+    board = [list(row) for row in grid.split()]
+    rows, cols = len(board), len(board[0])
+
+    for i in range(rows):
+        for j in range(cols):
+            if board[i][j] == 'x':
+                bfs(i, j, rows, cols, board)
+
+    updated_grid = ' '.join([''.join(row) for row in board])
+    return updated_grid
+
 def get_player_id(current_game):
     if (current_game.current_player == current_game.player1_id):
         return 1
