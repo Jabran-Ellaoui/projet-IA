@@ -45,7 +45,7 @@ class Game(db.Model):
                 "x" * (table_size - 1) + "2"
         ])
 
-    def apply_movement(self, player_new_x, player_new_y, new_boxes):
+    def save_movement(self, player_new_x, player_new_y, new_boxes):
         '''
         La fonction apply_movement prend trois paramètres :
 

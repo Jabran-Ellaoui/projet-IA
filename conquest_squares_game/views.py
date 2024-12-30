@@ -6,6 +6,7 @@ from .models import db, Player, Game
 from .ai import get_move
 from sqlalchemy.exc import SQLAlchemyError
 from .viewsFunctions import *
+from config import *
 
 
 app = Flask(__name__)
@@ -59,6 +60,7 @@ def jeu():
     Résultat :
     - Rendu de la vue "game.html" avec les informations du jeu, notamment l'ID du jeu et l'état initial de la grille (grid_state).
     '''
+    
     player1 = Player.query.filter_by(name="Player 1").first()
     player2 = Player.query.filter_by(name="Player IA").first()
 
@@ -127,7 +129,7 @@ def travel_request():
         "symbol": player_symbol
     }
 
-    result_player1 = is_valid_movement(movement_position, array_string, player_data)
+    result_player1 = apply_movement(movement_position, array_string, player_data)
     
     if result_player1 == - 1 :
         return jsonify({
@@ -142,7 +144,7 @@ def travel_request():
     if (current_player == player1_id):
         new_x_player1, new_y_player1, array_string_player1 = result_player1
         # pour enregister les nouvelles positions, et position, et passé la main à l'IA
-        last_player_x, last_player_y, new_player_x, new_player_y = current_game.apply_movement(new_x_player1,new_y_player1,array_string_player1)
+        last_player_x, last_player_y, new_player_x, new_player_y = current_game.save_movement(new_x_player1,new_y_player1,array_string_player1)
         
         current_player = player2_id
         db.session.commit()
@@ -151,17 +153,16 @@ def travel_request():
     possibles_moves = valides_possibles_moves(array_string_player1, {"x" : last_player_x, "y" : last_player_y, "symbol" : "2"})
     
     # après avoir choisies le mouvement, l'ia apliquer les changements a la base de donnees, elle renvoie le resultat pour l'affichage 
-    chosen_move = get_move(current_game, possibles_moves)
+    chosen_move = get_move(current_game, possibles_moves, EPSILON, ALPHA, GAMMA)
 
 
     #print("choise move :",chosen_move)
-    result_IA = is_valid_movement(MOVE[chosen_move], array_string_player1, {"x": last_player_x,"y": last_player_y, "symbol" : "2"})
+    new_x_IA, new_y_IA, array_string_IA = apply_movement(MOVE[chosen_move], array_string_player1, {"x": last_player_x,"y": last_player_y, "symbol" : "2"})
 
     current_player = player1_id
     db.session.commit() 
 
-    new_x_IA, new_y_IA, array_string_IA = result_IA
-    new_player_x, new_player_y, last_player_x, last_player_y = current_game.apply_movement(new_x_IA,new_y_IA,array_string_IA)
+    new_player_x, new_player_y, last_player_x, last_player_y = current_game.save_movement(new_x_IA,new_y_IA,array_string_IA)
     checkBoard()
     array_string_IA = current_game.boxes
     winner = check_winner(array_string_IA)

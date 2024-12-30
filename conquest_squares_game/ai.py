@@ -1,11 +1,9 @@
 import random
 from sqlalchemy import Null, nullsfirst, false
-from .models import QTable, Game
-from .viewsFunctions import is_valid_movement,checkBoard
-
-import random
 from .models import QTable, Game, History, db
+from .viewsFunctions import apply_movement,checkBoard
 from colorama import Fore, Back, Style, init
+from config import *
 
 init() # Initialisation de Colorama pour le debug
 
@@ -180,7 +178,7 @@ def exploitation(q_entry, possibles_moves):
 
 
 # en fait je pense que cette fonction ne fait que renvoie un mouvement pas besoin de plus d'�l�ment, il seront ajout� plus loin. 
-def get_move(current_game, possibles_moves, epsilon=0.1, alpha=0.2, gamma=0.9):
+def get_move(current_game, possibles_moves, epsilon, alpha, gamma):
     """
     L'IA choisit et apprend un mouvement en utilisant la logique du Q-learning.
 
@@ -291,7 +289,7 @@ def learning_by_renforcing (player_id, game_id, current_qTable_instance, move, e
     
     db.session.commit()
 
-    
+
 
 
 

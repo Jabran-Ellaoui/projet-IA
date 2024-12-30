@@ -11,9 +11,9 @@ DIRECTION_MAP = {
     }
 
 #Description des paramètres
-def is_valid_movement(movement, array_string, player):
+def apply_movement(movement, array_string, player):
     '''
-    La fonction is_valid_movement prend en paramètre :
+    La fonction apply_movement prend en paramètre :
 
     - movement : Dictionnaire indiquant le déplacement du joueur ({"x": ..., "y": ...}), 
     où "x" et "y" représentent le décalage horizontal et vertical respectivement. 
@@ -88,7 +88,7 @@ def valides_possibles_moves(array_string, player) :
     valid_moves_and_cons = []
     possibles_moves = [{"x": 0, "y" : -1},{"x": 1, "y" : 0},{"x": 0, "y" : 1},{"x": -1, "y" : 0}]
     for tested_move in possibles_moves :
-        result_move = is_valid_movement(tested_move, array_string, player)
+        result_move = apply_movement(tested_move, array_string, player)
         if result_move != -1 : 
             
             valid_moves_and_cons.append(DIRECTION_MAP[tested_move["x"],tested_move["y"]])       
