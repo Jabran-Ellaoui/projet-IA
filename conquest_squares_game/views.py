@@ -121,6 +121,7 @@ def travel_request():
     player_x = current_game.playerpos1_x
     player_y = current_game.playerpos1_y 
     array_string = current_game.boxes
+    
     # résultat du tableau par rapport au mouvement de l'humain
     movement_position = {"x": movement_x, "y": movement_y}
     player_data = {
@@ -154,6 +155,7 @@ def travel_request():
     
     # après avoir choisies le mouvement, l'ia apliquer les changements a la base de donnees, elle renvoie le resultat pour l'affichage 
     chosen_move = get_move(current_game, possibles_moves, EPSILON, ALPHA, GAMMA)
+    
 
 
     #print("choise move :",chosen_move)

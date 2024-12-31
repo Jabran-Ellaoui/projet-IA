@@ -6,9 +6,6 @@ from conquest_squares_game.aiTraining import *
 from colorama import Fore, Back, Style, init
 
 
-   
-        
-
 if __name__ == "__main__":
     logging.getLogger('werkzeug').setLevel(logging.CRITICAL)
     logging.getLogger('flask').setLevel(logging.ERROR)

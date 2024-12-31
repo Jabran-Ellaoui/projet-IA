@@ -122,8 +122,10 @@ def check_winner(grid_string):
         
     # Détermine le gagnant en fonction des compteurs
     if count_player1 > count_player2:
+        #print("GRID STRING", grid_string)
         return 1  # Le joueur humain a gagné
     elif count_player2 > count_player1:
+         #print("GRID STRING", grid_string)
          return 2  # L'IA a gagné
     else:
          return 3  # Égalité ou aucun gagnant déterminé (optionnel)

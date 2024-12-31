@@ -85,21 +85,36 @@ def calculate_cell_capture_reward(previous_boxes, new_boxes, ai_symbol):
       Si aucune case n'a été capturée, une petite pénalité est appliquée, retournant -1. 
       Si des cases ont été capturées, la récompense correspond à l'augmentation du nombre de cases contrôlées.
     """
+    if (ai_symbol == "1"):
+        otherSymbol = "2"
+    else:
+        otherSymbol = "1"
+        
     previous_p2_cells = previous_boxes.count(ai_symbol)
     new_p2_cells = new_boxes.count(ai_symbol)
+    print("Cases du joueur", ai_symbol, new_p2_cells)
 
-    previous_p1_cells = sum(1 for symbol in previous_boxes if symbol not in [' ', 'x', ai_symbol])
-    new_p2_cells = sum(1 for symbol in new_boxes if symbol not in [' ', 'x', ai_symbol])
-    
-    reward = (new_p2_cells - previous_p2_cells if new_p2_cells - previous_p2_cells > 0 else -1) - 0.5 * (new_p2_cells - previous_p1_cells)
-    
-    if 'x' not in new_boxes :
-        if new_p2_cells > new_p2_cells : 
+    previous_p1_cells = previous_boxes.count(otherSymbol)
+    new_p1_cells = new_boxes.count(otherSymbol)
+    print("Cases du joueur", otherSymbol, new_p1_cells)
+
+    if (new_p2_cells > previous_p2_cells):
+        reward = new_p2_cells - previous_p2_cells
+    else:
+        reward = -1
+
+    reward -= 0.5 * (new_p1_cells - previous_p1_cells)
+
+    if new_boxes == previous_boxes:
+        reward -= 2
+
+    if 'x' not in new_boxes:
+        if new_p2_cells > new_p1_cells:
             reward += 10
-        else :
+        else:
             reward -= 10
 
-    return reward 
+    return reward
 
 
 # si on veut creer une instance, il faut savoir les quelles sont nullables
@@ -210,7 +225,7 @@ def get_move(current_game, possibles_moves, epsilon, alpha, gamma):
     current_game.playerpos2_y
     )
 
-    #print("Current State Board:", state_board)
+    print("Current State Board:", state_board)
     # cree ou recupere une instance de qtable selon sont existance par rapport a un etat donnee d'un plateau 
     q_entry = instance_QTable(state_board)
     
@@ -225,11 +240,16 @@ def get_move(current_game, possibles_moves, epsilon, alpha, gamma):
         print(Fore.GREEN + "[INFO] : L'IA a choisi l'exploitation")
         
     # ici string_move : est bien sous sa forme voulue, un string
-    learning_by_renforcing(current_game.current_player,current_game.id_game, q_entry, chosen_move, epsilon, alpha, gamma )
+    if (current_game.current_player == current_game.player1_id):
+        ai_symbol = "1"
+    else:
+        ai_symbol = "2"
+    
+    learning_by_renforcing(current_game.current_player,current_game.id_game, q_entry, ai_symbol, chosen_move, epsilon, alpha, gamma)
 
     return chosen_move
 
-def learning_by_renforcing (player_id, game_id, current_qTable_instance, move, epsilon, alpha, gamma):
+def learning_by_renforcing (player_id, game_id, current_qTable_instance, ai_symbol, move, epsilon, alpha, gamma):
     """
     Applique l'apprentissage par renforcement pour mettre à jour les valeurs d'espérance de l'IA.
 
@@ -262,15 +282,17 @@ def learning_by_renforcing (player_id, game_id, current_qTable_instance, move, e
             precedent_state_board =  current_qTable_instance.state_board,   
             precedent_move = move
         )
+        print(Fore.GREEN + f"[INFO] : PLATEAU HISTORIQUE PRECEDENT : {game_history.precedent_state_board}\n[INFO] : PLATEAU HISTORIQUE ACTUEL {current_qTable_instance.state_board}")
         db.session.add(game_history)
         print(Fore.GREEN + f"[INFO] : Premier mouvement effectué : {move}")
     else : 
-        reward = calculate_cell_capture_reward(game_history.precedent_state_board, current_qTable_instance.state_board, ai_symbol="2")
+        reward = calculate_cell_capture_reward(game_history.precedent_state_board, current_qTable_instance.state_board, ai_symbol)
+        print(Fore.GREEN + f"[INFO] : PLATEAU HISTORIQUE PRECEDENT : {game_history.precedent_state_board}\n[INFO] : PLATEAU HISTORIQUE ACTUEL {current_qTable_instance.state_board}")
 
         previous_move = game_history.precedent_move
         previous_instance_QTable = QTable.query.get(game_history.precedent_state_board)
 
-        print(Fore.CYAN + f"[INFO] : Mouvement précédent = {previous_move}\n[INFO] : Mouvement actuel = {move}\n[INFO] : Récompense = {reward}\n")
+        print(Fore.CYAN + f"[INFO] : Mouvement précédent = {previous_move}\n[INFO] : Mouvement actuel = {move}\n[INFO] : Récompense = {reward}\n[INFO] : AI_SYMBOL = {ai_symbol}")
         max_future_value = get_max_esperance(current_qTable_instance)
         print(Fore.CYAN + f"[INFO] : Meilleure valeur estimée pour l'état futur -> {max_future_value}")
 

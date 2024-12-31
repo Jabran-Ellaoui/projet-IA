@@ -46,7 +46,8 @@ def run_game(game, ai1, ai2):
     
     while not winner and turn_count < MAX_TURNS:
         turn_count += 1
-        print("Début", board)
+        print("Game ID : ", game.id_game)
+
         
         if game.current_player == game.player1_id:
             player_x = game.playerpos1_x
@@ -64,17 +65,17 @@ def run_game(game, ai1, ai2):
         player_new_x, player_new_y, new_board = apply_movement(move_dict, board, {"x": player_x, "y": player_y, "symbol": symbol})
         if game.current_player == game.player1_id:
             game.playerpos1_x = player_new_x
-            game.playerpos2_y = player_new_y
+            game.playerpos1_y = player_new_y
         else:
             game.playerpos2_x = player_new_x
             game.playerpos2_y = player_new_y
         updatedBoard = checkBoardAI(new_board)
-        print(updatedBoard)
+        print("Plateau : ", updatedBoard)
         board = updatedBoard
+        game.boxes = board
         winner = check_winner(updatedBoard)
-
         game.current_player = game.player1_id if game.current_player == game.player2_id else game.player2_id
-
+        db.session.commit()
     if winner == 0:
         print(f"Partie inachevée ou bloquée après {turn_count} tours.")
     else:
