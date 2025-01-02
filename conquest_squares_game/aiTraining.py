@@ -7,6 +7,7 @@ from .views import *
 from .ai import *
 from config import *
 from colorama import Fore, Back, Style, init
+import csv
 
 
 
@@ -92,7 +93,6 @@ def run_game(game, id_random_player):
     return winner, turn_count
 
 
-
 def start_training():
     # Ouverture de fichier
     init_db()
@@ -100,22 +100,38 @@ def start_training():
     ai1, ai2, randomAi = create_ai_players(db)
     game = create_game(ai1, ai2)
 
-    while (game.id_game < 100):
-        winner, turn_count = run_game(game,randomAi)
+    while game.id_game < 100:
+        winner, turn_count = run_game(game, randomAi)
         nbGames += 1
         game = create_game(ai1, ai2)
 
-        if (nbGames % 10 == 0):
-            print(Fore.RED + "[INFO] : Lancement de la phase d'entrainement")
+        if nbGames % 10 == 0:
+            print(Fore.RED + "[INFO] : Lancement de la phase d'entraînement")
             nbGame = 0
-            while (nbGame < 10):
-                 players = [ai1, randomAi]
-                 player1 = random.choice(players) 
-                 player2 = ai1 if player1 == randomAi else randomAi
-                 winner, turn_count = run_game(game, randomAi.id_player)
-                 nbGame += 1
-                 game = create_game(player1, player2)
-            print(Fore.RED + "[INFO] : Fin de la phase d'entrainement")
+
+            # Création du fichier CSV
+            with open("training_phase.csv", "w", newline="") as csvfile:
+                fieldnames = ["game_id", "winner_id", "turn_count"]
+                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+                writer.writeheader()
+
+                while nbGame < 10:
+                    players = [ai1, randomAi]
+                    player1 = random.choice(players)
+                    player2 = ai1 if player1 == randomAi else randomAi
+                    winner, turn_count = run_game(game, randomAi.id_player)
+
+                    # Écrire les résultats de chaque partie dans le fichier CSV
+                    writer.writerow({
+                        "game_id": game.id_game,
+                        "Winner" : winner,
+                        "turn_count": turn_count
+                    })
+
+                    nbGame += 1
+                    game = create_game(player1, player2)
+
+            print(Fore.RED + "[INFO] : Fin de la phase d'entraînement")
             
 
 
