@@ -14,12 +14,12 @@ def create_ai_players(db):
     ai2 = Player.query.filter_by(name="AI-2").first()
    
     if not ai1:
-        player1 = Player(name="AI-1", is_human=False)
+        ai1 = Player(name="AI-1", is_human=False)
         db.session.add(ai1)
         db.session.commit()  
 
     if not ai2:
-        player2 = Player(name="AI-2", is_human=False)
+        ai2 = Player(name="AI-2", is_human=False)
         db.session.add(ai2)
         db.session.commit()
     print("Joueurs créés")

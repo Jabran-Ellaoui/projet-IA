@@ -91,13 +91,13 @@ def calculate_cell_capture_reward(previous_boxes, new_boxes, ai_symbol):
         otherSymbol = "1"
     print("calcule_reward (état du jeu précédent) : (ERREUR)", previous_boxes) 
     print("calcule_reward (état du jeu actuelle ) : (ERREUR)", new_boxes)
-    previous_p2_cells = previous_boxes.count(ai_symbol)
-    new_p2_cells = new_boxes.count(ai_symbol)
-    print("Cases du joueur ", ai_symbol," : ", new_p2_cells + 1)
+    previous_p2_cells = previous_boxes.count(ai_symbol) + previous_boxes.count('B')
+    new_p2_cells = new_boxes.count(ai_symbol) + new_boxes.count('B')
+    print("Cases du joueur ", ai_symbol," : ", new_p2_cells)
 
-    previous_p1_cells = previous_boxes.count(otherSymbol)
-    new_p1_cells = new_boxes.count(otherSymbol)
-    print("Cases du joueur ", otherSymbol," : ", new_p1_cells + 1)
+    previous_p1_cells = previous_boxes.count(otherSymbol)  + previous_boxes.count('A')
+    new_p1_cells = new_boxes.count(otherSymbol) + new_boxes.count('A')
+    print("Cases du joueur ", otherSymbol," : ", new_p1_cells )
 
     if (new_p2_cells > previous_p2_cells):
         reward = new_p2_cells - previous_p2_cells
