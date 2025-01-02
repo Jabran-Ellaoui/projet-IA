@@ -1,0 +1,88 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\gyuri\\OneDrive\\Documents\\GitHub\\projet-IA\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\gyuri\\OneDrive\\Documents\\GitHub\\projet-IA\\conquest_squares_game\\ai.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:conquest_squares_game\\ai.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\gyuri\\OneDrive\\Documents\\GitHub\\projet-IA\\conquest_squares_game\\aiTraining.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:conquest_squares_game\\aiTraining.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\gyuri\\OneDrive\\Documents\\GitHub\\projet-IA\\config.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:config.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\gyuri\\OneDrive\\Documents\\GitHub\\projet-IA\\conquest_squares_game\\models.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:conquest_squares_game\\models.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 2,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "config.py",
+              "DocumentMoniker": "C:\\Users\\gyuri\\OneDrive\\Documents\\GitHub\\projet-IA\\config.py",
+              "RelativeDocumentMoniker": "config.py",
+              "ToolTip": "C:\\Users\\gyuri\\OneDrive\\Documents\\GitHub\\projet-IA\\config.py",
+              "RelativeToolTip": "config.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAPAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2025-01-01T12:26:27.55Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "models.py",
+              "DocumentMoniker": "C:\\Users\\gyuri\\OneDrive\\Documents\\GitHub\\projet-IA\\conquest_squares_game\\models.py",
+              "RelativeDocumentMoniker": "conquest_squares_game\\models.py",
+              "ToolTip": "C:\\Users\\gyuri\\OneDrive\\Documents\\GitHub\\projet-IA\\conquest_squares_game\\models.py",
+              "RelativeToolTip": "conquest_squares_game\\models.py",
+              "ViewState": "AgIAAEgAAAAAAAAAAAAAAFkAAAAdAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2025-01-01T11:15:05.466Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "ai.py",
+              "DocumentMoniker": "C:\\Users\\gyuri\\OneDrive\\Documents\\GitHub\\projet-IA\\conquest_squares_game\\ai.py",
+              "RelativeDocumentMoniker": "conquest_squares_game\\ai.py",
+              "ToolTip": "C:\\Users\\gyuri\\OneDrive\\Documents\\GitHub\\projet-IA\\conquest_squares_game\\ai.py",
+              "RelativeToolTip": "conquest_squares_game\\ai.py",
+              "ViewState": "AgIAAOQAAAAAAAAAAAAtwOwAAAAkAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2025-01-01T10:42:27.586Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "aiTraining.py",
+              "DocumentMoniker": "C:\\Users\\gyuri\\OneDrive\\Documents\\GitHub\\projet-IA\\conquest_squares_game\\aiTraining.py",
+              "RelativeDocumentMoniker": "conquest_squares_game\\aiTraining.py",
+              "ToolTip": "C:\\Users\\gyuri\\OneDrive\\Documents\\GitHub\\projet-IA\\conquest_squares_game\\aiTraining.py",
+              "RelativeToolTip": "conquest_squares_game\\aiTraining.py",
+              "ViewState": "AgIAADIAAAAAAAAAAAAYwEAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2025-01-01T10:30:45.176Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

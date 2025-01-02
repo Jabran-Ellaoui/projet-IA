@@ -21,7 +21,7 @@ if __name__ == "__main__":
             nb_qentries = db.session.query(qEntries).count()
             print(Fore.YELLOW + f"[INFO] : Nombre de parties jouées : {nb_games}" )
             print(Fore.YELLOW + f"[INFO] : Nombre d'entrées QTable : {nb_qentries}\n")
-            start_training()
+            #start_training()
     app.run()
  
 

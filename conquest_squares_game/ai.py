@@ -89,14 +89,15 @@ def calculate_cell_capture_reward(previous_boxes, new_boxes, ai_symbol):
         otherSymbol = "2"
     else:
         otherSymbol = "1"
-        
+    print("calcule_reward (état du jeu précédent) : (ERREUR)", previous_boxes) 
+    print("calcule_reward (état du jeu actuelle ) : (ERREUR)", new_boxes)
     previous_p2_cells = previous_boxes.count(ai_symbol)
     new_p2_cells = new_boxes.count(ai_symbol)
-    print("Cases du joueur", ai_symbol, new_p2_cells)
+    print("Cases du joueur ", ai_symbol," : ", new_p2_cells + 1)
 
     previous_p1_cells = previous_boxes.count(otherSymbol)
     new_p1_cells = new_boxes.count(otherSymbol)
-    print("Cases du joueur", otherSymbol, new_p1_cells)
+    print("Cases du joueur ", otherSymbol," : ", new_p1_cells + 1)
 
     if (new_p2_cells > previous_p2_cells):
         reward = new_p2_cells - previous_p2_cells
@@ -279,15 +280,15 @@ def learning_by_renforcing (player_id, game_id, current_qTable_instance, ai_symb
         game_history = History (
             id_game = game_id,
             id_player = player_id,
-            precedent_state_board =  current_qTable_instance.state_board,   
+            precedent_state_board = current_qTable_instance.state_board,
             precedent_move = move
         )
-        print(Fore.GREEN + f"[INFO] : PLATEAU HISTORIQUE PRECEDENT : {game_history.precedent_state_board}\n[INFO] : PLATEAU HISTORIQUE ACTUEL {current_qTable_instance.state_board}")
+        print(Fore.GREEN + f"[INFO] : PLATEAU PRECEDENT (History) : {game_history.precedent_state_board}\n[INFO] : PLATEAU ACTUEL (History) {current_qTable_instance.state_board}")
         db.session.add(game_history)
         print(Fore.GREEN + f"[INFO] : Premier mouvement effectué : {move}")
     else : 
         reward = calculate_cell_capture_reward(game_history.precedent_state_board, current_qTable_instance.state_board, ai_symbol)
-        print(Fore.GREEN + f"[INFO] : PLATEAU HISTORIQUE PRECEDENT : {game_history.precedent_state_board}\n[INFO] : PLATEAU HISTORIQUE ACTUEL {current_qTable_instance.state_board}")
+        print(Fore.GREEN + f"[INFO] : PLATEAU PRECEDENT (History) : {game_history.precedent_state_board}\n[INFO] : PLATEAU ACTUEL (History) {current_qTable_instance.state_board}")
 
         previous_move = game_history.precedent_move
         previous_instance_QTable = QTable.query.get(game_history.precedent_state_board)

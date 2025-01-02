@@ -3,7 +3,7 @@ from collections import deque
 
 from flask import Flask, render_template, request, jsonify, redirect, url_for, send_from_directory
 from .models import db, Player, Game
-from .ai import get_move
+from .ai import *
 from sqlalchemy.exc import SQLAlchemyError
 from .viewsFunctions import *
 from config import *
@@ -153,11 +153,10 @@ def travel_request():
     # changement appliquer : on donne a l'IA, les differents mouvements possibles
     possibles_moves = valides_possibles_moves(array_string_player1, {"x" : last_player_x, "y" : last_player_y, "symbol" : "2"})
     
+    checkBoard()
     # après avoir choisies le mouvement, l'ia apliquer les changements a la base de donnees, elle renvoie le resultat pour l'affichage 
     chosen_move = get_move(current_game, possibles_moves, EPSILON, ALPHA, GAMMA)
     
-
-
     #print("choise move :",chosen_move)
     new_x_IA, new_y_IA, array_string_IA = apply_movement(MOVE[chosen_move], array_string_player1, {"x": last_player_x,"y": last_player_y, "symbol" : "2"})
 
