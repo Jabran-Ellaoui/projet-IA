@@ -79,6 +79,7 @@ def calculate_cell_capture_reward(previous_boxes, new_boxes, ai_symbol, turn_cou
       Chaque case est représentée par un caractère, et l'IA est représentée par `ai_symbol`.
     - new_boxes (str) : L'état du plateau après le mouvement, également représenté par une chaîne de caractères.
     - ai_symbol (str, optionnel) : Le symbole utilisé pour représenter l'IA sur le plateau. Par défaut, il s'agit de "2".
+    - turn_count (int, optionnel) : Le nombre de tours de la partie en cours
 
     Retourne :
     - int : La récompense calculée en fonction de l'augmentation des cases contrôlées par l'IA. 
@@ -109,10 +110,8 @@ def calculate_cell_capture_reward(previous_boxes, new_boxes, ai_symbol, turn_cou
     if 'x' not in new_boxes or turn_count == MAX_TURNS:
         if new_p2_cells > new_p1_cells:
             reward += 10
-            print(Fore.RED + f"RECOMPENSE FIN DE GAME {reward}")
         else:
             reward -= 10
-            print(Fore.RED + f"RECOMPENSE FIN DE GAME {reward}")
 
     return reward
 
@@ -209,7 +208,7 @@ def get_move(current_game, possibles_moves, epsilon, alpha, gamma, turn_count):
       Par défaut, c'est 0.1.
     - alpha (float, optionnel) : Le taux d'apprentissage. Définit à quel point l'IA met à jour ses valeurs d'espérance. Par défaut, c'est 0.2.
     - gamma (float, optionnel) : Le facteur de discount. Définit l'importance des récompenses futures. Par défaut, c'est 0.9.
-
+    - turn_count (int) : Nombre de tours de la partie en cours
     Retourne :
     - dict : le mouvement choisie sous la forme d'un string
 
@@ -231,8 +230,7 @@ def get_move(current_game, possibles_moves, epsilon, alpha, gamma, turn_count):
         chosen_move = exploration(possibles_moves)
     else:
         chosen_move = exploitation(q_entry, possibles_moves)
-        
-    # ici string_move : est bien sous sa forme voulue, un string
+   
     if (current_game.current_player == current_game.player1_id):
         ai_symbol = "1"
     else:
@@ -257,6 +255,7 @@ def learning_by_renforcing (player_id, game_id, current_qTable_instance, ai_symb
     - epsilon (float) : Le taux d'exploration (non utilisé directement dans cette fonction, mais lié à la stratégie d'apprentissage).
     - alpha (float) : Le taux d'apprentissage, qui détermine dans quelle mesure les nouvelles informations influencent les valeurs d'espérance.
     - gamma (float) : Le facteur de discount, qui détermine l'importance des récompenses futures dans l'apprentissage.
+    - turn_count (int) : Le nombre de tours de la partie en cours.
 
     Retourne :
     - None : Cette fonction ne retourne rien, mais met à jour les valeurs d'espérance dans la base de données.

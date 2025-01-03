@@ -43,12 +43,10 @@ def apply_movement(movement, array_string, player):
 
     # Vérifie les limites de la grille
     if not (0 <= new_x < len(grid[0]) and 0 <= new_y < len(grid)):
-        #print(f"Le mouvement {movement} est en dehors des limites: new_x={new_x}, new_y={new_y}")
         return -1  # Mouvement non autorisé
 
     # Vérifie si la case cible est occupée
     target_cell = grid[new_y][new_x]
-    #print(f"Cellule ciblée : {movement}: {target_cell}")
 
     if target_cell == 'x' or int(target_cell) == int(player["symbol"]):
         # Mouvement autorisé, mise à jour de la grille
@@ -59,7 +57,6 @@ def apply_movement(movement, array_string, player):
         # Retourne la nouvelle position et la grille mise à jour
         return new_x, new_y, modified_array_string
     else:
-        #print(f"Le mouvement {movement} est invalide: la cellule est occupée par {target_cell}")
         return -1
   
 #renvoie les mouvements valides sous la forme d'un x et d'un y
@@ -116,19 +113,15 @@ def check_winner(grid_string):
     if "x" in grid_string:
          return 0  # Le jeu n'est pas encore terminé
         
-        # Compte les occurrences de "1" (joueur humain) et "2" (IA) dans la grille
+    # Compte les occurrences de "1" (joueur humain) et "2" (IA) dans la grille
     count_player1 = grid_string.count("1")
     count_player2 = grid_string.count("2")
         
     # Détermine le gagnant en fonction des compteurs
     if count_player1 > count_player2:
-        #print("GRID STRING", grid_string)
         return 1  # Le joueur humain a gagné
     elif count_player2 > count_player1:
-         #print("GRID STRING", grid_string)
          return 2  # L'IA a gagné
-    else:
-         return 3  # Égalité ou aucun gagnant déterminé (optionnel)
 
 
 def bfs(initial_x, initial_y, totalRows, totalColumns, board):
